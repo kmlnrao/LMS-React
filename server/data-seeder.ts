@@ -262,6 +262,7 @@ async function seedInventoryItems() {
     const location = getRandomElement(locations);
     const lastRestocked = randomDate(subMonths(new Date(), 6), new Date());
     
+    // Create inventory object without lastRestocked field which is not in InsertInventoryItem type
     inventoryData.push({
       name,
       notes: `Hospital grade ${category.toLowerCase()} for patient care`,
@@ -271,8 +272,7 @@ async function seedInventoryItems() {
       minimumLevel: minimumStock,
       unitCost,
       supplier,
-      location,
-      lastRestocked
+      location
     });
   }
   
@@ -316,12 +316,11 @@ async function seedEquipment() {
     const maintenanceInterval = getRandomNumber(60, 180); // Days
     const nextMaintenance = addDays(lastMaintenance, maintenanceInterval);
     
+    // Create equipment object without lastMaintenance and nextMaintenance fields
     equipmentData.push({
       name,
       type: equipmentType,
       status: status as any,
-      lastMaintenance,
-      nextMaintenance,
       timeRemaining: Math.floor(Math.random() * 120), // Random time remaining for equipment in use
       notes: `Regular maintenance needed every ${maintenanceInterval} days`
     });
@@ -445,8 +444,8 @@ async function seedTasks() {
   
   // Get all departments, users, and processes for assignments
   const allDepartments = await db.select().from(departments);
-  const allUsers = await db.select().from(users).where((user) => user.role.equals("staff"));
-  const allProcesses = await db.select().from(laundryProcesses).where((process) => process.isActive.equals(true));
+  const allUsers = await db.select().from(users);
+  const allProcesses = await db.select().from(laundryProcesses);
   
   const priorities = ["High", "Medium", "Low"];
   const statuses = ["pending", "in_progress", "completed", "delayed"];
@@ -490,7 +489,8 @@ async function seedTasks() {
     const weight = getRandomNumber(5, 100);
     const processId = getRandomElement(allProcesses).id;
     
-    taskData.push({
+    // Create task object without completedAt field which is not in InsertTask type
+    const taskObj: any = {
       taskId,
       description,
       requestedById,
@@ -498,11 +498,12 @@ async function seedTasks() {
       status: status as any,
       priority,
       dueDate,
-      completedAt,
       assignedToId: assignedToUser.id,
       weight,
       processId: processId
-    });
+    };
+    
+    taskData.push(taskObj);
   }
   
   // Create batches of 10 to avoid overloading the database
@@ -572,6 +573,6 @@ async function seedCostAllocations() {
 }
 
 export async function checkIfDataExists() {
-  const userCount = await db.select({ count: db.fn.count() }).from(users);
-  return userCount[0].count > 1; // Check if there's more than just the admin user
+  const userCount = await db.select().from(users);
+  return userCount.length > 1; // Check if there's more than just the admin user
 }

@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { seedAllData, checkIfDataExists } from "./data-seeder";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Check if we need to seed the database
+  const dataExists = await checkIfDataExists();
+  if (!dataExists) {
+    log("No data found. Seeding the database...");
+    await seedAllData();
+    log("Database seeding complete!");
+  } else {
+    log("Data already exists in the database. Skipping seeding.");
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
