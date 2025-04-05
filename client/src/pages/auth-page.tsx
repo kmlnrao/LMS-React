@@ -23,11 +23,6 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const { user, loginMutation } = useAuth();
 
-  // Redirect if already logged in
-  if (user) {
-    return <Redirect to="/" />;
-  }
-
   // Login form
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -51,6 +46,11 @@ export default function AuthPage() {
     });
   };
 
+  // Redirect to home if user is already logged in
+  if (user) {
+    return <Redirect to="/" />;
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="container grid gap-8 lg:grid-cols-2 lg:gap-12 max-w-6xl">

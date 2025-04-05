@@ -21,11 +21,23 @@ import { useToast } from "@/hooks/use-toast";
 export default function UserManagement() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50); // Show 50 users per page
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Calculate the offset based on current page and page size
+  const offset = (currentPage - 1) * pageSize;
+
   const { data: users, isLoading, error, refetch } = useQuery<User[]>({
-    queryKey: ["/api/users"],
+    queryKey: ["/api/users", offset, pageSize],
+    queryFn: async () => {
+      const response = await fetch(`/api/users?offset=${offset}&limit=${pageSize}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    }
   });
 
   const deleteUserMutation = useMutation({
@@ -33,7 +45,14 @@ export default function UserManagement() {
       await apiRequest("DELETE", `/api/users/${userId}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      // Invalidate all user queries with any parameters
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          // Check if query key is an array and its first element is "/api/users"
+          return Array.isArray(queryKey) && queryKey[0] === "/api/users";
+        }
+      });
       toast({
         title: "User deleted",
         description: "The user has been deleted successfully.",
@@ -117,6 +136,37 @@ export default function UserManagement() {
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}
               />
+              
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {users?.length || 0} users (page {currentPage})
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={currentPage === 1 || isLoading}
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(prev - 1, 1));
+                    }}
+                  >
+                    Previous
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={(users?.length || 0) < pageSize || isLoading}
+                    onClick={() => {
+                      if ((users?.length || 0) >= pageSize) {
+                        setCurrentPage(prev => prev + 1);
+                      }
+                    }}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -168,7 +218,10 @@ export default function UserManagement() {
             </CardHeader>
             <CardContent>
               <UserTable
-                users={users?.filter((user) => user.role === "department")}
+                users={users?.filter((user) => 
+                  // Include users with department role or those who have a department assigned
+                  user.role === "department" || Boolean(user.department)
+                )}
                 isLoading={isLoading}
                 error={error}
                 onEdit={handleEditUser}

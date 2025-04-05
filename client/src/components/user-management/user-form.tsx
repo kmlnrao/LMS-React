@@ -103,9 +103,14 @@ export function UserForm({ user, onClose }: UserFormProps) {
       }
     },
     onSuccess: () => {
-      // Force refetch the users list to ensure UI is updated
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.refetchQueries({ queryKey: ["/api/users"] });
+      // Invalidate all user queries with any query parameters
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          // Check if query key is an array and its first element is "/api/users"
+          return Array.isArray(queryKey) && queryKey[0] === "/api/users";
+        }
+      });
       
       toast({
         title: `User ${user ? "updated" : "created"} successfully`,
