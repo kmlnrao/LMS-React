@@ -41,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/auth/session"], { user });
+      // Also refresh the query to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/session"] });
     },
     onError: (error: Error) => {
       toast({
