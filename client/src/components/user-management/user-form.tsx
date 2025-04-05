@@ -31,7 +31,7 @@ const userFormSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  role: z.enum(["admin", "staff", "department"]),
+  role: z.enum(["admin", "staff", "department", "manager", "supervisor", "inventory", "technician", "billing", "reports"]),
   department: z.string().optional(),
   email: z.string().email("Invalid email format").optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
@@ -103,7 +103,10 @@ export function UserForm({ user, onClose }: UserFormProps) {
       }
     },
     onSuccess: () => {
+      // Force refetch the users list to ensure UI is updated
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.refetchQueries({ queryKey: ["/api/users"] });
+      
       toast({
         title: `User ${user ? "updated" : "created"} successfully`,
         description: `The user has been ${user ? "updated" : "created"}.`,
@@ -212,6 +215,12 @@ export function UserForm({ user, onClose }: UserFormProps) {
                   <SelectItem value="admin">Administrator</SelectItem>
                   <SelectItem value="staff">Laundry Staff</SelectItem>
                   <SelectItem value="department">Department User</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="supervisor">Supervisor</SelectItem>
+                  <SelectItem value="inventory">Inventory Manager</SelectItem>
+                  <SelectItem value="technician">Technician</SelectItem>
+                  <SelectItem value="billing">Billing Staff</SelectItem>
+                  <SelectItem value="reports">Reports Analyst</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>

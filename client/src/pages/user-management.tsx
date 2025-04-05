@@ -67,6 +67,8 @@ export default function UserManagement() {
   const handleUserFormClose = () => {
     setIsAddUserDialogOpen(false);
     setEditingUser(null);
+    // Explicitly refetch users when the form is closed
+    refetch();
   };
 
   return (
