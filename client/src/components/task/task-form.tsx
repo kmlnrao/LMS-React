@@ -136,7 +136,13 @@ export function TaskForm({ onClose }: TaskFormProps) {
   const onSubmit = async (data: TaskFormValues) => {
     setIsSubmitting(true);
     try {
-      await createTaskMutation.mutateAsync(data);
+      // Ensure dueDate is properly formatted as an ISO string
+      const formattedData = {
+        ...data,
+        dueDate: data.dueDate instanceof Date ? data.dueDate : new Date(data.dueDate),
+      };
+      
+      await createTaskMutation.mutateAsync(formattedData);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

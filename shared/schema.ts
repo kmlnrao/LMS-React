@@ -144,7 +144,19 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true }).ext
 });
 
 export const insertDepartmentSchema = createInsertSchema(departments).omit({ id: true });
-export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, completedAt: true });
+export const insertTaskSchema = createInsertSchema(tasks)
+  .omit({ id: true, createdAt: true, completedAt: true })
+  .extend({
+    dueDate: z.preprocess(
+      (arg) => {
+        if (typeof arg === 'string' || arg instanceof Date) {
+          return new Date(arg);
+        }
+        return arg;
+      },
+      z.date()
+    )
+  });
 export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({ id: true, lastRestocked: true });
 export const insertEquipmentSchema = createInsertSchema(equipment).omit({ id: true, lastMaintenance: true, nextMaintenance: true });
 export const insertLaundryProcessSchema = createInsertSchema(laundryProcesses).omit({ id: true });
