@@ -86,6 +86,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
   // Billing specialist
   'billing': [
     'dashboard',
+    'tasks',
     'billing',
     'reports'
   ],
@@ -93,6 +94,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
   // Reports specialist
   'reports': [
     'dashboard',
+    'tasks',
     'reports'
   ]
 };

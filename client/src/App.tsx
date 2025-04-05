@@ -54,6 +54,17 @@ function Router() {
         )} 
       />
       
+      {/* Tasks - requires 'tasks' feature permission */}
+      <FeatureProtectedRoute 
+        path="/tasks" 
+        feature="tasks"
+        component={() => (
+          <MainLayout>
+            <ProcessConfig />
+          </MainLayout>
+        )} 
+      />
+      
       {/* Inventory Management - requires 'inventory' feature permission */}
       <FeatureProtectedRoute 
         path="/inventory" 

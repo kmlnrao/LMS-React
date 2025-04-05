@@ -98,7 +98,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
                 variant="link"
                 size="sm"
                 className="text-primary hover:text-primary/80"
-                onClick={navigateToProcessConfig}
+                onClick={() => setLocation("/tasks")}
               >
                 View All
               </Button>
