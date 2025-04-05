@@ -145,8 +145,9 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true }).ext
 
 export const insertDepartmentSchema = createInsertSchema(departments).omit({ id: true });
 export const insertTaskSchema = createInsertSchema(tasks)
-  .omit({ id: true, createdAt: true, completedAt: true })
+  .omit({ id: true, createdAt: true, completedAt: true, taskId: true }) // Make taskId optional - the server will generate it
   .extend({
+    taskId: z.string().optional(), // Allow but don't require taskId
     dueDate: z.preprocess(
       (arg) => {
         if (typeof arg === 'string' || arg instanceof Date) {

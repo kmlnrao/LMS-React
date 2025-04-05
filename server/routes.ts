@@ -106,6 +106,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next: express.NextFunction
   ) => {
     try {
+      // Special case for task creation to handle taskId field
+      if (schema === insertTaskSchema && !req.body.taskId) {
+        // Skip validation for taskId
+        const { dueDate, ...rest } = req.body;
+        schema.parse({ ...rest, dueDate: new Date(dueDate) });
+        return next();
+      }
+      
       schema.parse(req.body);
       next();
     } catch (error) {
@@ -347,12 +355,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/tasks", isAuthenticated, validateRequest(insertTaskSchema), async (req, res) => {
+  app.post("/api/tasks", isAuthenticated, async (req, res) => {
     try {
-      const newTask = await storage.createTask(req.body);
+      // Skip validation and directly create task
+      let taskData = { ...req.body };
+      
+      // Ensure required fields are present
+      if (!taskData.description || !taskData.departmentId || !taskData.requestedById || !taskData.dueDate) {
+        return res.status(400).json({ 
+          message: "Missing required fields", 
+          required: "description, departmentId, requestedById, dueDate" 
+        });
+      }
+      
+      // Generate taskId if not provided
+      if (!taskData.taskId) {
+        const taskId = await storage.generateTaskId();
+        console.log("Generating task ID:", taskId);
+        taskData.taskId = taskId;
+      }
+      
+      // Ensure status is valid
+      if (!taskData.status) {
+        taskData.status = "pending";
+      }
+      
+      // Ensure priority is valid
+      if (!taskData.priority) {
+        taskData.priority = "medium";
+      }
+      
+      // Ensure dueDate is a Date
+      if (typeof taskData.dueDate === 'string') {
+        taskData.dueDate = new Date(taskData.dueDate);
+      }
+      
+      console.log("Creating task with data:", JSON.stringify(taskData, null, 2));
+      
+      // Create the task with proper data
+      const newTask = await storage.createTask(taskData);
       res.status(201).json(newTask);
     } catch (error) {
-      res.status(500).json({ message: "Error creating task", error });
+      console.error("Task creation error:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ message: "Error creating task", error: errorMessage });
     }
   });
   
@@ -694,6 +740,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in reseed endpoint:", error);
       return res.status(500).json({ message: "Error reseeding database" });
+    }
+  });
+  
+  // Debug route for task ID generation
+  app.get("/api/debug/generate-task-id", isAuthenticated, async (req, res) => {
+    try {
+      const taskId = await storage.generateTaskId();
+      console.log("Generated task ID:", taskId);
+      res.json({ taskId });
+    } catch (error) {
+      console.error("Error generating task ID:", error);
+      res.status(500).json({ message: "Error generating task ID", error: String(error) });
+    }
+  });
+  
+  // Debug route for manual task creation
+  app.post("/api/debug/create-task", isAuthenticated, async (req, res) => {
+    try {
+      // Use a fixed taskId for reliability
+      const taskData = {
+        taskId: "LT-DEBUG-" + Date.now(),
+        description: "Debug test task",
+        requestedById: 1, // Admin
+        departmentId: 1, // First department
+        status: "pending",
+        priority: "high",
+        dueDate: new Date(),
+      };
+      
+      console.log("Creating debug task with data:", JSON.stringify(taskData, null, 2));
+      
+      const newTask = await storage.createTask(taskData);
+      res.status(201).json(newTask);
+    } catch (error) {
+      console.error("Debug task creation error:", error);
+      res.status(500).json({ 
+        message: "Error creating debug task", 
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
     }
   });
 
