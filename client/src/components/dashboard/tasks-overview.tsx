@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TaskForm } from "@/components/task/task-form";
+import { useLocation } from "wouter";
 
 interface TasksOverviewProps {
   limit?: number;
@@ -41,6 +42,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
   const [activeTab, setActiveTab] = useState("all");
   const [page, setPage] = useState(1);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const statusFilter = activeTab !== "all" ? activeTab : undefined;
   
@@ -72,13 +74,35 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
     setIsTaskFormOpen(false);
   };
   
+  const navigateToUsers = () => {
+    setLocation("/users");
+  };
+  
+  const navigateToReports = () => {
+    setLocation("/reports");
+  };
+  
+  const navigateToProcessConfig = () => {
+    setLocation("/process-config");
+  };
+  
   return (
     <>
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Tasks */}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-            <CardTitle>Recent Laundry Tasks</CardTitle>
+            <div className="flex items-center space-x-2">
+              <CardTitle>Recent Laundry Tasks</CardTitle>
+              <Button
+                variant="link"
+                size="sm"
+                className="text-primary hover:text-primary/80"
+                onClick={() => setLocation("/process-config")}
+              >
+                View All
+              </Button>
+            </div>
             <div className="flex space-x-2">
               <Button
                 variant={activeTab === "all" ? "default" : "ghost"}
@@ -217,6 +241,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
             <Button 
               variant="outline" 
               className="w-full flex items-center justify-between p-3"
+              onClick={navigateToUsers}
             >
               <span className="flex items-center">
                 <UserPlus className="mr-2 h-5 w-5" />
@@ -228,6 +253,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
             <Button 
               variant="outline" 
               className="w-full flex items-center justify-between p-3"
+              onClick={navigateToReports}
             >
               <span className="flex items-center">
                 <FileSpreadsheet className="mr-2 h-5 w-5" />
@@ -239,6 +265,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
             <Button 
               variant="outline" 
               className="w-full flex items-center justify-between p-3"
+              onClick={navigateToProcessConfig}
             >
               <span className="flex items-center">
                 <Settings className="mr-2 h-5 w-5" />
