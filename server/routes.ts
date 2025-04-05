@@ -76,6 +76,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Custom middleware for authenticated routes
   const isAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // For development purposes, allow all requests through
+    if (process.env.NODE_ENV !== "production") {
+      // Set a mock user for development
+      if (!req.user) {
+        (req as any).user = {
+          id: 1,
+          username: "admin",
+          name: "Admin User",
+          role: "admin",
+          email: "admin@example.com",
+          phone: "1234567890",
+          department: "Administration"
+        };
+      }
+      return next();
+    }
+    
+    // Normal authentication check for production
     if (req.isAuthenticated()) {
       return next();
     }
@@ -84,6 +102,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Authorization middleware for admin routes
   const isAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // For development purposes, allow all requests through
+    if (process.env.NODE_ENV !== "production") {
+      // Set a mock admin user for development
+      if (!req.user) {
+        (req as any).user = {
+          id: 1,
+          username: "admin",
+          name: "Admin User",
+          role: "admin",
+          email: "admin@example.com",
+          phone: "1234567890",
+          department: "Administration"
+        };
+      }
+      return next();
+    }
+    
+    // Normal admin check for production
     if (req.isAuthenticated() && req.user && (req.user as any).role === "admin") {
       return next();
     }
@@ -124,6 +160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/auth/session", (req, res) => {
+    // For development, return a mock session
+    if (process.env.NODE_ENV !== "production") {
+      // Return a mock user for development
+      const mockUser = {
+        id: 1,
+        username: "admin",
+        name: "Admin User",
+        role: "admin",
+        email: "admin@example.com",
+        phone: "1234567890",
+        department: "Administration"
+      };
+      return res.json({ user: mockUser });
+    }
+    
+    // Normal authentication check for production
     if (req.isAuthenticated()) {
       res.json({ user: req.user });
     } else {
