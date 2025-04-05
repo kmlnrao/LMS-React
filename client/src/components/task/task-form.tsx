@@ -57,24 +57,25 @@ export function TaskForm({ onClose }: TaskFormProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Default values for the form
-  const defaultValues: TaskFormValues = {
+  // Default values for the form - defined outside of component rendering logic
+  const defaultValues = {
     description: "",
     departmentId: 0,
     assignedToId: undefined,
     priority: "medium",
-    status: "pending",
-    weight: undefined,
+    status: "pending" as const,  // Use const assertion to ensure correct type
+    weight: undefined as number | undefined,
     dueDate: addDays(new Date(), 1),
     notes: "",
   };
 
+  // Form must be initialized before any conditional returns
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues,
   });
 
-  // Get departments for select input
+  // Get departments for select input - ensure consistent order of hooks
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery<Department[]>({
     queryKey: ["/api/departments"],
   });
@@ -87,9 +88,13 @@ export function TaskForm({ onClose }: TaskFormProps) {
   // Mutation for creating a new task
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormValues) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
+      
       const taskData = {
         ...data,
-        requestedById: user?.id, // Set the current user as the requester
+        requestedById: user.id,
         status: data.status as "pending" | "in_progress" | "completed" | "delayed"
       };
       
@@ -121,6 +126,8 @@ export function TaskForm({ onClose }: TaskFormProps) {
     setIsSubmitting(true);
     try {
       await createTaskMutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Error submitting form:", error);
     } finally {
       setIsSubmitting(false);
     }
