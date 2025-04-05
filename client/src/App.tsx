@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import EquipmentPage from "@/pages/equipment";
 import TasksPage from "@/pages/tasks";
+import DepartmentsPage from "@/pages/departments";
 import { MainLayout } from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth";
 import { 
@@ -128,7 +129,7 @@ function Router() {
         feature="departments"
         component={() => (
           <MainLayout>
-            <ProcessConfig />
+            <DepartmentsPage />
           </MainLayout>
         )} 
       />
