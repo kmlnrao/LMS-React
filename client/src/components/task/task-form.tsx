@@ -25,6 +25,13 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import {
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { addDays } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -138,219 +145,228 @@ export function TaskForm({ onClose }: TaskFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="e.g., Ward 5 daily linen change" />
-              </FormControl>
-              <FormDescription>
-                Brief description of the laundry task
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
+    <DialogContent className="sm:max-w-[600px]">
+      <DialogHeader>
+        <DialogTitle>Create New Laundry Task</DialogTitle>
+        <DialogDescription>
+          Fill in the details to create a new laundry task. Required fields are marked.
+        </DialogDescription>
+      </DialogHeader>
+      
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
           <FormField
             control={form.control}
-            name="departmentId"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Department</FormLabel>
-                <Select
-                  onValueChange={(value) => field.onChange(parseInt(value))}
-                  defaultValue={field.value?.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {isDepartmentsLoading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : departments?.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id.toString()}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="assignedToId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Assign To (Optional)</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    if (value === "unassigned") {
-                      field.onChange(undefined);
-                    } else {
-                      field.onChange(parseInt(value));
-                    }
-                  }}
-                  defaultValue={field.value?.toString() || "unassigned"}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Assign to staff" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
-                    {isUsersLoading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : users?.filter(user => 
-                        user.role === "staff" || 
-                        user.role === "supervisor"
-                      ).map((staff) => (
-                      <SelectItem key={staff.id} value={staff.id.toString()}>
-                        {staff.username} ({staff.role})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Priority</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="weight"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weight (kg) (Optional)</FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    step="0.1" 
-                    min="0" 
-                    {...field} 
-                    onChange={(e) => {
-                      if (e.target.value === '') {
+                  <Input {...field} placeholder="e.g., Ward 5 daily linen change" />
+                </FormControl>
+                <FormDescription>
+                  Brief description of the laundry task
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="departmentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isDepartmentsLoading ? (
+                        <SelectItem value="loading" disabled>Loading...</SelectItem>
+                      ) : departments?.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id.toString()}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="assignedToId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assign To (Optional)</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      if (value === "unassigned") {
                         field.onChange(undefined);
                       } else {
-                        field.onChange(parseFloat(e.target.value));
+                        field.onChange(parseInt(value));
                       }
                     }}
+                    defaultValue={field.value?.toString() || "unassigned"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Assign to staff" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {isUsersLoading ? (
+                        <SelectItem value="loading" disabled>Loading...</SelectItem>
+                      ) : users?.filter(user => 
+                          user.role === "staff" || 
+                          user.role === "supervisor"
+                        ).map((staff) => (
+                        <SelectItem key={staff.id} value={staff.id.toString()}>
+                          {staff.username} ({staff.role})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Weight (kg) (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      step="0.1" 
+                      min="0" 
+                      {...field} 
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(parseFloat(e.target.value));
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="dueDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Due Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  When this task needs to be completed
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Any additional instructions or information"
+                    rows={3}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                When this task needs to be completed
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea 
-                  {...field} 
-                  placeholder="Any additional instructions or information"
-                  rows={3}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" type="button" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Task"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" type="button" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Task"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </DialogContent>
   );
 }
