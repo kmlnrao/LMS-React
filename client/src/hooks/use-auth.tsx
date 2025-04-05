@@ -22,16 +22,17 @@ type LoginData = Pick<InsertUser, "username" | "password">;
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const {
-    data: userData,
-    error,
-    isLoading,
-  } = useQuery<{ user: SelectUser } | null, Error>({
+  // Ensure hooks are called consistently in the same order
+  const userQuery = useQuery<{ user: SelectUser } | null, Error>({
     queryKey: ["/api/auth/session"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     staleTime: 0, // Don't cache the user session
   });
+  
+  const userData = userQuery.data;
+  const error = userQuery.error;
+  const isLoading = userQuery.isLoading;
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {

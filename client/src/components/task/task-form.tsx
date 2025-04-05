@@ -76,14 +76,18 @@ export function TaskForm({ onClose }: TaskFormProps) {
   });
 
   // Get departments for select input - ensure consistent order of hooks
-  const { data: departments, isLoading: isDepartmentsLoading } = useQuery<Department[]>({
+  const departmentsQuery = useQuery<Department[]>({
     queryKey: ["/api/departments"],
   });
+  const departments = departmentsQuery.data;
+  const isDepartmentsLoading = departmentsQuery.isLoading;
 
   // Get users (staff) for select input
-  const { data: users, isLoading: isUsersLoading } = useQuery<User[]>({
+  const usersQuery = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
+  const users = usersQuery.data;
+  const isUsersLoading = usersQuery.isLoading;
 
   // Mutation for creating a new task
   const createTaskMutation = useMutation({
