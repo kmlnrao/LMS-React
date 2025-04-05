@@ -1,0 +1,75 @@
+Create a modern and user-friendly laundry management module is for a hospital.it should integrate seamlessly with the hospital management system (HMS). Here are the key features categorized by stakeholders:
+
+Technology Stack should be:
+
+react, Node, Postgress Database
+
+it should integrate with Postgress Database. Generate Sample Data in the Database schema which should be seen and manage from front-end
+
+1. Admin Features
+
+Dashboard: Overview of laundry operations, pending tasks, and analytics.
+
+User Management: Add, edit, and assign roles to laundry staff.
+
+Laundry Process Configuration: Define washing, drying, and sterilization procedures.
+
+Inventory Management: Track detergent, disinfectants, and laundry-related consumables.
+
+Billing & Cost Allocation: Assign laundry costs to different departments.
+
+Reports & Analytics: Generate usage reports, operational efficiency, and cost reports.
+
+Integration with HMS: Sync with patient records, bed management, and infection control sys…
+[4:10 am, 30/3/2025] Boss 2: Since this housekeeping management module will be part of a hospital management system (HMS), it should ensure efficient hospital hygiene, infection control, and resource optimization. Below are the key features categorized by stakeholders:
+
+1. Admin Features
+
+Dashboard: Overview of housekeeping tasks, pending requests, and hygiene compliance.
+
+User & Role Management: Assign roles to housekeeping staff and supervisors.
+
+Task Scheduling & Assignment: Automate and assign cleaning tasks to staff.
+
+Inventory Management: Track cleaning supplies, disinfectants, and linens.
+
+Compliance & Hygiene Tracking: Monitor infection control adherence with audit logs.
+
+Billing & Cost Allocation: Allocate housekeeping costs to different hospital departments.
+
+Reports & Analytics: Generate cleaning reports, compliance logs, and efficiency metrics.
+
+Integration with HMS: Sync with patient records, bed management, and facility maintenance.
+
+
+2. Housekeeping Staff Features
+
+Task Assignment & Checklist: Receive tasks with step-by-step cleaning checklists.
+
+Status Updates: Mark tasks as in-progress, completed, or pending supervisor approval.
+
+Incident Reporting: Report issues like spills, broken equipment, or biohazard concerns.
+
+Barcode/RFID Tracking: Track cleaning supplies usage and movement of linen.
+
+Alerts & Reminders: Get notifications for urgent cleaning tasks and supply restocking.
+
+
+3. Hospital Departments (Users)
+
+Request Housekeeping Service: Departments (ICU, OT, Wards) can place cleaning requests.
+
+Emergency Cleaning Requests: Prioritize cleaning in case of spills or contamination.
+
+Room Readiness Status: Track whether rooms are cleaned and available for new patients.
+
+Audit Trail & Compliance Logs: Monitor cleaning frequency and regulatory adherence.
+
+
+4. Mobile & IoT Integration
+
+Mobile App for Housekeeping Staff: Receive tasks, update status, and report issues on the go.
+
+Smart Sensors & IoT: Monitor cleanliness levels, air quality, and automate sanitization alerts.
+
+
