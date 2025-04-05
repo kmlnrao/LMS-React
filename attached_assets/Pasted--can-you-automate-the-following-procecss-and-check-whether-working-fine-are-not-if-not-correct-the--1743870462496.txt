@@ -1,0 +1,124 @@
+
+can you automate the following procecss and check whether working fine are not if not correct the flow.
+
+Complete Laundry Management Process Flow with Test User Credentials
+Here's a detailed step-by-step walkthrough of the laundry task lifecycle across different roles, including specific test usernames and passwords from our system:
+
+1. Department Request (Task Creation)
+Login as Department Head:
+Username: rakesh.sharma
+Password: password123
+Role: department
+Create a Laundry Request:
+Navigate to "Tasks" in the sidebar
+Click "New Laundry Request" button
+Fill out the form:
+Description: "Urgent bedding change for isolation ward"
+Department: Will be pre-filled with your department
+Priority: High
+Weight: 15 kg
+Due Date: Select tomorrow's date
+Notes: "Patient discharge expected, need priority service"
+Click "Submit"
+Note the generated Task ID (e.g., LT-12345) for tracking
+2. Supervisor Review and Assignment
+Login as Laundry Supervisor:
+Username: priya.patel
+Password: password123
+Role: supervisor
+Review and Assign Task:
+Go to "Tasks" page in the sidebar
+Click on the "Pending" tab to see new requests
+Find the task you created as department head
+Click "View" to see full details
+Click "Update Status" button
+Change status to "In Progress"
+Save changes
+The task is now in the processing queue
+3. Staff Processing
+Login as Laundry Staff:
+Username: amit.kumar
+Password: password123
+Role: staff
+Process the Task:
+Go to the "Tasks" page
+Click on the "In Progress" tab
+Find the task that was assigned
+Begin physical processing of the laundry
+When ready to complete:
+Click the "Complete Task" button on the task card
+Or click "Update Status" and select "Completed"
+The system will record the completion time
+4. Manager Verification
+Login as Manager:
+Username: ananya.singh
+Password: password123
+Role: manager
+Review Completed Tasks:
+Go to the "Tasks" page
+Use the status filter to view "Completed" tasks
+Find the recently completed task
+Click "View" to see the full task history:
+Creation time and requester
+Status changes with timestamps
+Completion time
+Check dashboard for updated metrics
+5. Inventory Management
+Login as Inventory Manager:
+Username: raj.malhotra
+Password: password123
+Role: inventory
+Update Inventory Based on Task:
+Go to "Inventory" page
+Check current levels of relevant supplies
+Update inventory counts as needed
+Link usage to specific departments for cost allocation
+6. Technical Support
+Login as Technician:
+Username: vikram.mehta
+Password: password123
+Role: technician
+Check Equipment Status:
+Go to "Equipment" page
+Review equipment usage statistics
+Check if maintenance is needed based on usage
+Update equipment status as needed
+7. Billing and Reporting
+Login as Billing Staff:
+Username: neha.gupta
+Password: password123
+Role: billing
+Process Department Charges:
+Go to "Billing" page
+Generate monthly usage report for departments
+View cost allocations by department
+Prepare billing summary
+Login as Reports Analyst:
+Username: sanjay.verma
+Password: password123
+Role: reports
+Generate Analytics:
+Go to "Reports" page
+Generate performance metrics:
+Task completion times
+Department utilization
+Staff productivity
+Export reports for management review
+8. Admin Review
+Login as Admin:
+Username: admin
+Password: admin123
+Role: admin
+System-Wide Verification:
+Go to "Dashboard" to see system-wide metrics
+Check "Tasks" to see all tasks across all statuses
+Review "User Management" to check staff activity
+Verify "Reports" section for overall performance indicators
+Check "HMS Integration" status
+Testing Tips:
+Create a new task with each department user to test department-specific workflows
+Use the admin account to reset task statuses if needed for testing
+Compare task processing times between different staff members
+Test the priority system by creating tasks with different priority levels
+Check that notifications and status updates are functioning correctly
+This comprehensive workflow demonstrates how different roles in the hospital laundry management system interact with the tasks throughout their lifecycle, from creation to completion and final reporting.

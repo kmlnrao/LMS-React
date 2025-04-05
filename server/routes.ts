@@ -9,7 +9,8 @@ import {
   insertEquipmentSchema,
   insertLaundryProcessSchema,
   insertCostAllocationSchema,
-  InsertUser
+  InsertUser,
+  InsertTask
 } from "@shared/schema";
 import { seedAllData, checkIfDataExists } from "./data-seeder";
 import { getDashboardStats, getDepartmentUsage, getTaskCompletionStats } from "./analytics-service";
@@ -550,10 +551,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Equipment item not found" });
       }
       
-      const updatedEquipment = await storage.updateEquipment(equipmentId, req.body);
-      res.json(updatedEquipment);
+      // Use a predefined set of allowed update fields to prevent issues
+      const { status } = req.body;
+      
+      // Create a safe update object with only the allowed fields
+      // And ensure status is a valid enum value
+      const updateData: any = {};
+      
+      if (status && ["available", "maintenance", "active", "in_queue"].includes(status)) {
+        updateData.status = status;
+      }
+      
+      console.log("Equipment update data:", updateData);
+      
+      // If we have valid fields to update, proceed
+      if (Object.keys(updateData).length > 0) {
+        const updatedEquipment = await storage.updateEquipment(equipmentId, updateData);
+        console.log("Updated equipment:", updatedEquipment);
+        res.json(updatedEquipment);
+      } else {
+        // Return the original equipment without changes if no valid fields
+        console.log("No valid fields to update, returning original equipment");
+        res.json(equipmentItem);
+      }
     } catch (error) {
-      res.status(500).json({ message: "Error updating equipment item", error });
+      console.error("Equipment update error:", error);
+      res.status(500).json({ 
+        message: "Error updating equipment item", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
   
@@ -758,20 +784,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug route for manual task creation
   app.post("/api/debug/create-task", isAuthenticated, async (req, res) => {
     try {
+      // Import values from schema enum
+      const { taskStatusEnum } = await import("@shared/schema");
+      
       // Use a fixed taskId for reliability
       const taskData = {
         taskId: "LT-DEBUG-" + Date.now(),
         description: "Debug test task",
         requestedById: 1, // Admin
         departmentId: 1, // First department
-        status: "pending",
+        status: "pending" as const, // TypeScript literal type
         priority: "high",
         dueDate: new Date(),
       };
       
       console.log("Creating debug task with data:", JSON.stringify(taskData, null, 2));
       
-      const newTask = await storage.createTask(taskData);
+      // Type assertion to satisfy TypeScript
+      const newTask = await storage.createTask(taskData as any);
       res.status(201).json(newTask);
     } catch (error) {
       console.error("Debug task creation error:", error);
