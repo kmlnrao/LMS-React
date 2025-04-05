@@ -89,24 +89,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Custom middleware for authenticated routes
   const isAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // For development purposes, allow all requests through
-    if (process.env.NODE_ENV !== "production") {
-      // Set a mock user for development
-      if (!req.user) {
-        (req as any).user = {
-          id: 1,
-          username: "admin",
-          name: "Admin User",
-          role: "admin",
-          email: "admin@example.com",
-          phone: "1234567890",
-          department: "Administration"
-        };
-      }
-      return next();
-    }
-    
-    // Normal authentication check for production
     if (req.isAuthenticated()) {
       return next();
     }
@@ -115,24 +97,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Authorization middleware for admin routes
   const isAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // For development purposes, allow all requests through
-    if (process.env.NODE_ENV !== "production") {
-      // Set a mock admin user for development
-      if (!req.user) {
-        (req as any).user = {
-          id: 1,
-          username: "admin",
-          name: "Admin User",
-          role: "admin",
-          email: "admin@example.com",
-          phone: "1234567890",
-          department: "Administration"
-        };
-      }
-      return next();
-    }
-    
-    // Normal admin check for production
     if (req.isAuthenticated() && req.user && (req.user as any).role === "admin") {
       return next();
     }
@@ -173,22 +137,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/auth/session", (req, res) => {
-    // For development, return a mock session
-    if (process.env.NODE_ENV !== "production") {
-      // Return a mock user from our mock data for development
-      const mockUser = {
-        id: 1,
-        username: "rajesh.kumar",
-        name: "Rajesh Kumar",
-        role: "admin",
-        email: "rajesh.kumar@hospital.org",
-        phone: "9876543210",
-        department: "Administration"
-      };
-      return res.json({ user: mockUser });
-    }
-    
-    // Normal authentication check for production
     if (req.isAuthenticated()) {
       res.json({ user: req.user });
     } else {
@@ -348,57 +296,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
   app.get("/api/tasks", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          {
-            id: 1,
-            taskId: "LT-1001",
-            description: "Emergency room linens change",
-            requestedById: 1,
-            assignedToId: 2,
-            departmentId: 1,
-            status: "in_progress",
-            priority: "high",
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            completedAt: null,
-            dueDate: new Date(Date.now() + 7200000).toISOString(),
-            weight: 5.2,
-            notes: "Needs priority handling due to emergency room requirements"
-          },
-          {
-            id: 2,
-            taskId: "LT-1002",
-            description: "Pediatrics daily linen change",
-            requestedById: 1,
-            assignedToId: 3,
-            departmentId: 3,
-            status: "pending",
-            priority: "medium",
-            createdAt: new Date(Date.now() - 7200000).toISOString(),
-            completedAt: null,
-            dueDate: new Date(Date.now() + 86400000).toISOString(),
-            weight: 4.8,
-            notes: "Standard daily change for pediatrics ward"
-          },
-          {
-            id: 3,
-            taskId: "LT-1003",
-            description: "Surgery special equipment cleaning",
-            requestedById: 2,
-            assignedToId: 4,
-            departmentId: 2,
-            status: "completed",
-            priority: "high",
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            completedAt: new Date(Date.now() - 43200000).toISOString(),
-            dueDate: new Date(Date.now() - 86400000).toISOString(),
-            weight: 3.5,
-            notes: "Special detergent required for surgical equipment"
-          }
-        ]);
-      }
-      
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string | undefined;
@@ -411,16 +308,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/tasks/count-by-status", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          { status: "pending", count: 23 },
-          { status: "in_progress", count: 15 },
-          { status: "completed", count: 42 },
-          { status: "delayed", count: 7 }
-        ]);
-      }
-      
       const statusCounts = await storage.getTasksCountByStatus();
       res.json(statusCounts);
     } catch (error) {
@@ -512,64 +399,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Inventory routes
   app.get("/api/inventory", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          {
-            id: 1,
-            name: "Bed Sheets (Queen)",
-            category: "Linens",
-            unit: "pcs",
-            quantity: 450,
-            minimumLevel: 120,
-            unitCost: 350.50,
-            location: "Storage Room A",
-            lastRestocked: new Date(Date.now() - 604800000).toISOString(),
-            supplier: "Hospital Textiles India Ltd.",
-            notes: "Standard quality hospital bed sheets"
-          },
-          {
-            id: 2,
-            name: "Pillowcases",
-            category: "Linens",
-            unit: "pcs",
-            quantity: 620,
-            minimumLevel: 180,
-            unitCost: 125.75,
-            location: "Storage Room A",
-            lastRestocked: new Date(Date.now() - 302400000).toISOString(),
-            supplier: "Hospital Textiles India Ltd.",
-            notes: "Regular replacement required"
-          },
-          {
-            id: 3,
-            name: "Surgical Towels",
-            category: "Surgical",
-            unit: "pcs",
-            quantity: 285,
-            minimumLevel: 150,
-            unitCost: 225.50,
-            location: "Storage Room B",
-            lastRestocked: new Date(Date.now() - 172800000).toISOString(),
-            supplier: "MedSupply Co.",
-            notes: "Sterilized surgical-grade towels"
-          },
-          {
-            id: 4,
-            name: "Laundry Detergent (Industrial)",
-            category: "Cleaning",
-            unit: "L",
-            quantity: 32,
-            minimumLevel: 15,
-            unitCost: 1250.99,
-            location: "Supply Closet 2",
-            lastRestocked: new Date(Date.now() - 1209600000).toISOString(),
-            supplier: "CleanPro Industries",
-            notes: "Hospital-grade detergent with disinfectant properties"
-          }
-        ]);
-      }
-      
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 20;
       const category = req.query.category as string | undefined;
@@ -640,52 +469,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Equipment routes
   app.get("/api/equipment", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          {
-            id: 1,
-            name: "Industrial Washer #1",
-            model: "WasherPro X5000",
-            status: "active",
-            location: "Laundry Room A",
-            lastMaintenance: new Date(Date.now() - 2592000000).toISOString(),
-            nextMaintenance: new Date(Date.now() + 2592000000).toISOString(),
-            maintenanceNotes: "Regular monthly inspection completed. All systems operational."
-          },
-          {
-            id: 2,
-            name: "Industrial Dryer #1",
-            model: "DryMax 3000",
-            status: "maintenance",
-            location: "Laundry Room A",
-            lastMaintenance: new Date(Date.now() - 86400000).toISOString(),
-            nextMaintenance: new Date(Date.now() + 259200000).toISOString(),
-            maintenanceNotes: "Heating element replacement scheduled. Currently operating at reduced capacity."
-          },
-          {
-            id: 3,
-            name: "Folding Machine #2",
-            model: "FoldMaster Pro",
-            status: "active",
-            location: "Laundry Room B",
-            lastMaintenance: new Date(Date.now() - 1209600000).toISOString(),
-            nextMaintenance: new Date(Date.now() + 1209600000).toISOString(),
-            maintenanceNotes: "Belts replaced during last maintenance."
-          },
-          {
-            id: 4,
-            name: "Garment Steamer",
-            model: "SteamPress 500",
-            status: "available",
-            location: "Storage",
-            lastMaintenance: new Date(Date.now() - 7776000000).toISOString(),
-            nextMaintenance: new Date(Date.now() + 1209600000).toISOString(),
-            maintenanceNotes: "Water valve needs inspection during next maintenance."
-          }
-        ]);
-      }
-      
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string | undefined;
@@ -750,62 +533,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Laundry Process routes
   app.get("/api/laundry-processes", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          {
-            id: 1,
-            name: "Standard Linen Wash",
-            description: "Standard 40°C wash cycle for regular linens",
-            duration: 45,
-            waterTemp: 40,
-            detergentAmount: 50,
-            isActive: true,
-            notes: "Used for most cotton and polyester blend linens."
-          },
-          {
-            id: 2,
-            name: "Surgical Linen Sanitize",
-            description: "High temperature sanitization cycle for surgical linens",
-            duration: 65,
-            waterTemp: 80,
-            detergentAmount: 60,
-            isActive: true,
-            notes: "Includes extra rinse cycle for thorough detergent removal. Uses hospital-grade disinfectant."
-          },
-          {
-            id: 3,
-            name: "Delicate Items",
-            description: "Gentle cycle for delicate fabrics",
-            duration: 35,
-            waterTemp: 30,
-            detergentAmount: 40,
-            isActive: true,
-            notes: "Low spin speed and specialized detergent for delicate items."
-          },
-          {
-            id: 4,
-            name: "Heavy Soil Treatment",
-            description: "Pre-treatment and extended wash for heavily soiled items",
-            duration: 75,
-            waterTemp: 60,
-            detergentAmount: 70,
-            isActive: true,
-            notes: "Includes 20-minute pre-soak with enzymatic cleaner."
-          },
-          {
-            id: 5,
-            name: "Legacy Cotton Process",
-            description: "Old process for cotton items",
-            duration: 55,
-            waterTemp: 50,
-            detergentAmount: 60,
-            isActive: false,
-            notes: "Deprecated. Use Standard Linen Wash instead."
-          }
-        ]);
-      }
-      
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 20;
       const isActive = req.query.isActive === "true" ? true : 
@@ -872,52 +599,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cost Allocation routes
   app.get("/api/cost-allocations", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          {
-            id: 1,
-            departmentId: 1,
-            month: "2025-03",
-            amount: 3450.50,
-            itemsProcessed: 1250,
-            costPerItem: 2.76,
-            createdAt: new Date(Date.now() - 864000000).toISOString(),
-            notes: "Includes emergency response linens priority handling."
-          },
-          {
-            id: 2,
-            departmentId: 2,
-            month: "2025-03",
-            amount: 4825.75,
-            itemsProcessed: 850,
-            costPerItem: 5.68,
-            createdAt: new Date(Date.now() - 864000000).toISOString(),
-            notes: "Higher cost due to specialized surgical linen processing."
-          },
-          {
-            id: 3,
-            departmentId: 3,
-            month: "2025-03",
-            amount: 2175.25,
-            itemsProcessed: 925,
-            costPerItem: 2.35,
-            createdAt: new Date(Date.now() - 864000000).toISOString(),
-            notes: "Standard processing for pediatrics department."
-          },
-          {
-            id: 4,
-            departmentId: 4,
-            month: "2025-03",
-            amount: 1980.80,
-            itemsProcessed: 680,
-            costPerItem: 2.91,
-            createdAt: new Date(Date.now() - 864000000).toISOString(),
-            notes: "Includes special handling for isolation unit items."
-          }
-        ]);
-      }
-      
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 20;
       const departmentId = req.query.departmentId ? parseInt(req.query.departmentId as string) : undefined;
@@ -983,17 +664,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics routes
   app.get("/api/analytics/department-usage", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json([
-          { departmentName: "Emergency", usage: 283 },
-          { departmentName: "Surgery", usage: 198 },
-          { departmentName: "Pediatrics", usage: 167 },
-          { departmentName: "ICU", usage: 142 },
-          { departmentName: "Radiology", usage: 98 }
-        ]);
-      }
-      
       const period = (req.query.period as "weekly" | "monthly" | "quarterly") || "weekly";
       const data = await storage.getDepartmentUsage(period);
       res.json(data);
@@ -1004,20 +674,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/analytics/task-completion", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        const today = new Date();
-        return res.json([
-          { date: new Date(today.setDate(today.getDate() - 6)).toISOString().split('T')[0], count: 23 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 19 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 25 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 18 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 32 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 27 },
-          { date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0], count: 31 }
-        ]);
-      }
-      
       const period = (req.query.period as "daily" | "weekly" | "monthly") || "daily";
       const data = await storage.getTaskCompletionStats(period);
       res.json(data);
@@ -1028,16 +684,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/analytics/dashboard-stats", isAuthenticated, async (req, res) => {
     try {
-      // For development mode, return mock data
-      if (process.env.NODE_ENV !== "production") {
-        return res.json({
-          pendingTasks: 42,
-          completedToday: 15,
-          inventoryStatus: 78,
-          monthlyCosts: 12450.75
-        });
-      }
-      
       const stats = await storage.getDashboardStats();
       res.json(stats);
     } catch (error) {
