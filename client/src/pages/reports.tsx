@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportCard } from "@/components/reports/report-card";
 import { Download, Filter, RefreshCw } from "lucide-react";
+import { formatIndianCurrency, formatIndianNumber } from "@/lib/format-utils";
 import {
   LineChart,
   Line,
@@ -163,7 +164,7 @@ export default function Reports() {
         
         <ReportCard
           title="Monthly Costs"
-          value={`$${(dashboardStats?.monthlyCosts || 0).toLocaleString()}`}
+          value={formatIndianCurrency(dashboardStats?.monthlyCosts || 0)}
           description="Total operational expenses"
           change={{
             value: 7,
@@ -214,7 +215,7 @@ export default function Reports() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [value, "Tasks"]} />
+                        <Tooltip formatter={(value) => [formatIndianNumber(value as number), "Tasks"]} />
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
@@ -275,7 +276,7 @@ export default function Reports() {
                           tick={{ fontSize: 12 }}
                         />
                         <YAxis />
-                        <Tooltip formatter={(value) => [value, "Tasks Completed"]} />
+                        <Tooltip formatter={(value) => [formatIndianNumber(value as number), "Tasks Completed"]} />
                         <Area
                           type="monotone"
                           dataKey="count"
@@ -349,7 +350,7 @@ export default function Reports() {
                         tick={{ fontSize: 12 }}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`${value} kg`, "Laundry Processed"]} />
+                      <Tooltip formatter={(value) => [`${formatIndianNumber(value as number)} kg`, "Laundry Processed"]} />
                       <Legend />
                       <Bar
                         dataKey="usage"
@@ -403,7 +404,7 @@ export default function Reports() {
                         tick={{ fontSize: 12 }}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => [value, "Tasks Completed"]} />
+                      <Tooltip formatter={(value) => [formatIndianNumber(value as number), "Tasks Completed"]} />
                       <Legend />
                       <Line
                         type="monotone"

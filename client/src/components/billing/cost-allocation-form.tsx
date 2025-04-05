@@ -179,7 +179,7 @@ export function CostAllocationForm({ costAllocation, departments, onClose }: Cos
             name="totalCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Cost ($)</FormLabel>
+                <FormLabel>Total Cost (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" min="0.01" step="0.01" {...field} />
                 </FormControl>
@@ -194,7 +194,7 @@ export function CostAllocationForm({ costAllocation, departments, onClose }: Cos
           name="costPerKg"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cost Per Kg ($)</FormLabel>
+              <FormLabel>Cost Per Kg (₹)</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 

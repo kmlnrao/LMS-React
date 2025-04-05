@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PlusCircle, RefreshCw, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatIndianCurrency } from "@/lib/format-utils";
 import {
   BarChart,
   Bar,
@@ -172,9 +173,9 @@ export default function Billing() {
                       tick={{ fontSize: 12 }}
                     />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, "Total Cost"]} />
+                    <Tooltip formatter={(value) => [formatIndianCurrency(value as number), "Total Cost"]} />
                     <Legend />
-                    <Bar dataKey="cost" name="Cost ($)" fill="#0070D1" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="cost" name="Cost (₹)" fill="#0070D1" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -198,28 +199,27 @@ export default function Billing() {
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Total Monthly Cost</h3>
                 <p className="text-3xl font-bold mt-1">
-                  ${costAllocations
-                    ?.reduce((sum, item) => sum + item.totalCost, 0)
-                    .toFixed(2) || "0.00"}
+                  {formatIndianCurrency(costAllocations
+                    ?.reduce((sum, item) => sum + item.totalCost, 0) || 0)}
                 </p>
               </div>
               
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Average Cost Per Department</h3>
                 <p className="text-3xl font-bold mt-1">
-                  ${costAllocations && costAllocations.length > 0 && departments && departments.length > 0
-                    ? (costAllocations.reduce((sum, item) => sum + item.totalCost, 0) / departments.length).toFixed(2)
-                    : "0.00"}
+                  {costAllocations && costAllocations.length > 0 && departments && departments.length > 0
+                    ? formatIndianCurrency(costAllocations.reduce((sum, item) => sum + item.totalCost, 0) / departments.length)
+                    : formatIndianCurrency(0)}
                 </p>
               </div>
               
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Average Cost Per Kg</h3>
                 <p className="text-3xl font-bold mt-1">
-                  ${costAllocations && costAllocations.length > 0
-                    ? (costAllocations.reduce((sum, item) => sum + item.totalCost, 0) / 
-                       costAllocations.reduce((sum, item) => sum + item.totalWeight, 0)).toFixed(2)
-                    : "0.00"}
+                  {costAllocations && costAllocations.length > 0
+                    ? formatIndianCurrency(costAllocations.reduce((sum, item) => sum + item.totalCost, 0) / 
+                       costAllocations.reduce((sum, item) => sum + item.totalWeight, 0))
+                    : formatIndianCurrency(0)}
                 </p>
               </div>
               

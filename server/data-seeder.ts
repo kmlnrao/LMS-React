@@ -535,8 +535,8 @@ async function seedCostAllocations() {
   for (const department of allDepartments) {
     for (let i = 0; i < 12; i++) {
       const allocationDate = subMonths(currentDate, i);
-      const monthName = months[allocationDate.getMonth()];
-      const year = allocationDate.getFullYear();
+      // Format as YYYY-MM to match schema definition
+      const formattedMonth = format(allocationDate, "yyyy-MM");
       
       // Generate amounts in Indian Rupees
       const laborCost = getRandomNumber(25000, 100000);
@@ -554,7 +554,7 @@ async function seedCostAllocations() {
       
       costData.push({
         departmentId: department.id,
-        month: `${monthName} ${year}`,
+        month: formattedMonth,
         totalWeight,
         totalCost,
         costPerKg

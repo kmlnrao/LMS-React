@@ -1,7 +1,8 @@
 import { StatsCard } from "@/components/ui/stats-card";
-import { Clock, CheckSquare, Archive, DollarSign } from "lucide-react";
+import { Clock, CheckSquare, Archive, IndianRupee } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatIndianCurrency } from "@/lib/format-utils";
 
 interface DashboardStats {
   pendingTasks: number;
@@ -77,8 +78,8 @@ export function DashboardSummary() {
       
       <StatsCard
         title="Monthly Costs"
-        value={`$${(data?.monthlyCosts || 0).toLocaleString()}`}
-        icon={<DollarSign className="h-5 w-5" />}
+        value={formatIndianCurrency(data?.monthlyCosts || 0)}
+        icon={<IndianRupee className="h-5 w-5" />}
         change={{
           value: 7,
           isIncrease: false,

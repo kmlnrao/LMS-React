@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowUp, ArrowDown } from "lucide-react";
+import { formatIndianCurrency, formatIndianNumber } from "@/lib/format-utils";
 import {
   BarChart,
   Bar,
@@ -95,7 +96,7 @@ export function ChartAnalytics() {
                 />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value) => [`${value} kg`, "Usage"]}
+                  formatter={(value) => [`${formatIndianNumber(value as number)} kg`, "Usage"]}
                   labelFormatter={(label) => `Department: ${label}`}
                 />
                 <Legend />
@@ -113,7 +114,7 @@ export function ChartAnalytics() {
               {isLoading ? (
                 <Skeleton className="h-8 w-20 mx-auto" />
               ) : (
-                chartData.reduce((sum, item) => sum + item.value, 0).toLocaleString()
+                formatIndianNumber(chartData.reduce((sum, item) => sum + item.value, 0))
               )}
             </p>
             <p className="text-xs text-status-success mt-1 flex items-center justify-center">
@@ -127,7 +128,7 @@ export function ChartAnalytics() {
               {isLoading ? (
                 <Skeleton className="h-8 w-20 mx-auto" />
               ) : (
-                "$1.85"
+                formatIndianCurrency(1.85)
               )}
             </p>
             <p className="text-xs text-status-error mt-1 flex items-center justify-center">

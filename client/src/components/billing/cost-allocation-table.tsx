@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { CostAllocation, Department } from "@shared/schema";
 import { Edit, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatIndianCurrency } from "@/lib/format-utils";
 
 interface CostAllocationTableProps {
   costAllocations?: CostAllocation[];
@@ -36,7 +37,7 @@ export function CostAllocationTable({
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
+    return formatIndianCurrency(amount);
   };
 
   if (error) {
