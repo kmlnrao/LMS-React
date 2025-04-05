@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Card, 
   CardContent, 
@@ -23,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +45,14 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
 export default function EquipmentPage() {
+  const { toast } = useToast();
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isMaintenanceDialogOpen, setIsMaintenanceDialogOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [maintenanceDate, setMaintenanceDate] = useState<string>("");
+  const [maintenanceNotes, setMaintenanceNotes] = useState<string>("");
   
   const { data: equipment, isLoading } = useQuery<Equipment[]>({
     queryKey: ['/api/equipment'],
@@ -79,8 +88,218 @@ export default function EquipmentPage() {
     return new Date(nextMaintenance) < new Date();
   };
   
+  // Mutation to update equipment
+  const updateEquipmentMutation = useMutation({
+    mutationFn: async (data: Partial<Equipment>) => {
+      if (!selectedEquipment) return null;
+      const response = await apiRequest(
+        "PATCH", 
+        `/api/equipment/${selectedEquipment.id}`, 
+        data
+      );
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/equipment'] });
+      toast({
+        title: "Equipment updated",
+        description: "The equipment has been updated successfully",
+      });
+      setIsEditDialogOpen(false);
+      setIsMaintenanceDialogOpen(false);
+      setSelectedEquipment(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update equipment: ${error instanceof Error ? error.message : "Unknown error"}`,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Handle edit button click
+  const handleEditClick = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setIsEditDialogOpen(true);
+  };
+  
+  // Handle schedule maintenance button click
+  const handleScheduleMaintenanceClick = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setMaintenanceDate("");
+    setMaintenanceNotes("");
+    setIsMaintenanceDialogOpen(true);
+  };
+  
+  // Handle start maintenance button click
+  const handleStartMaintenanceClick = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    if (window.confirm(`Start maintenance for ${equipment.name}?`)) {
+      updateEquipmentMutation.mutate({
+        status: "maintenance",
+        lastMaintenance: new Date().toISOString() as unknown as Date
+      });
+    }
+  };
+  
+  // Handle schedule maintenance form submission
+  const handleScheduleMaintenanceSubmit = () => {
+    if (!maintenanceDate) {
+      toast({
+        title: "Validation error",
+        description: "Please select a maintenance date",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Convert string date to ISO string
+    const nextMaintenanceDate = new Date(maintenanceDate);
+    
+    updateEquipmentMutation.mutate({
+      nextMaintenance: nextMaintenanceDate.toISOString() as unknown as Date,
+      notes: maintenanceNotes || undefined
+    });
+  };
+  
+  // Handle edit form submission
+  const handleEditSubmit = (formData: Partial<Equipment>) => {
+    updateEquipmentMutation.mutate(formData);
+  };
+  
+  // Implement edit dialog content
+  const renderEditDialog = () => {
+    return (
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Edit Equipment</DialogTitle>
+            <DialogDescription>
+              Update details for {selectedEquipment?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-name" className="text-right">Name</Label>
+              <Input 
+                id="edit-name" 
+                placeholder="Washing Machine A-1" 
+                className="col-span-3"
+                defaultValue={selectedEquipment?.name}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-type" className="text-right">Type</Label>
+              <Select defaultValue={selectedEquipment?.type}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select equipment type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Washer">Washer</SelectItem>
+                  <SelectItem value="Dryer">Dryer</SelectItem>
+                  <SelectItem value="Ironer">Ironer</SelectItem>
+                  <SelectItem value="Folder">Folder</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-status" className="text-right">Status</Label>
+              <Select defaultValue={selectedEquipment?.status}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="maintenance">Under Maintenance</SelectItem>
+                  <SelectItem value="in_queue">In Queue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-notes" className="text-right">Notes</Label>
+              <Textarea 
+                id="edit-notes" 
+                placeholder="Optional notes about the equipment" 
+                className="col-span-3"
+                defaultValue={selectedEquipment?.notes || ""}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => {
+              // Simple approach just for demo, in a real app would use form validation
+              const name = document.getElementById("edit-name") as HTMLInputElement;
+              const notes = document.getElementById("edit-notes") as HTMLTextAreaElement;
+              
+              handleEditSubmit({
+                name: name.value,
+                notes: notes.value || undefined
+              });
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+  
+  // Implement maintenance scheduling dialog
+  const renderMaintenanceDialog = () => {
+    return (
+      <Dialog open={isMaintenanceDialogOpen} onOpenChange={setIsMaintenanceDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Schedule Maintenance</DialogTitle>
+            <DialogDescription>
+              Schedule maintenance for {selectedEquipment?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="maintenance-date" className="text-right">Date</Label>
+              <div className="col-span-3">
+                <Input 
+                  id="maintenance-date" 
+                  type="date" 
+                  value={maintenanceDate} 
+                  onChange={(e) => setMaintenanceDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="maintenance-notes" className="text-right">Notes</Label>
+              <Textarea 
+                id="maintenance-notes" 
+                placeholder="Maintenance details" 
+                className="col-span-3"
+                value={maintenanceNotes}
+                onChange={(e) => setMaintenanceNotes(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMaintenanceDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleScheduleMaintenanceSubmit}>Schedule</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {renderEditDialog()}
+      {renderMaintenanceDialog()}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Equipment Management</h2>
@@ -250,11 +469,18 @@ export default function EquipmentPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditClick(item)}
+                            >
+                              Edit
+                            </Button>
                             <Button 
                               variant="outline" 
                               size="sm"
                               disabled={item.status === 'maintenance'}
+                              onClick={() => handleScheduleMaintenanceClick(item)}
                             >
                               Schedule Maintenance
                             </Button>
@@ -327,7 +553,12 @@ export default function EquipmentPage() {
                                 <TableCell>{item.nextMaintenance ? format(new Date(item.nextMaintenance), "MMM d, yyyy") : "-"}</TableCell>
                                 <TableCell className="text-red-600 font-medium">{daysOverdue} days</TableCell>
                                 <TableCell>
-                                  <Button size="sm">Start Maintenance</Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => handleStartMaintenanceClick(item)}
+                                  >
+                                    Start Maintenance
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             );
@@ -386,7 +617,13 @@ export default function EquipmentPage() {
                                 <TableCell>{item.nextMaintenance ? format(new Date(item.nextMaintenance), "MMM d, yyyy") : "-"}</TableCell>
                                 <TableCell>{daysRemaining} days</TableCell>
                                 <TableCell>
-                                  <Button size="sm" variant="outline">Reschedule</Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleScheduleMaintenanceClick(item)}
+                                  >
+                                    Reschedule
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             );
