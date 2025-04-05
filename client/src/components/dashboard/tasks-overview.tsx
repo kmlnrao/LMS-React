@@ -137,7 +137,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
                       <StatusBadge status={task.status} />
                     </TableCell>
                     <TableCell>
-                      {format(new Date(task.dueDate), "MMM d, h:mm a")}
+                      {task.dueDate ? format(new Date(task.dueDate), "MMM d, h:mm a") : "Not set"}
                     </TableCell>
                     <TableCell>
                       <Button variant="link" size="sm">
@@ -152,7 +152,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
         </CardContent>
         <CardFooter className="flex justify-between border-t p-3">
           <span className="text-sm text-gray-500">
-            Showing {limit} of {tasks?.length || 0} tasks
+            Showing up to {limit} tasks per page
           </span>
           <div className="flex space-x-1">
             <Button
@@ -170,7 +170,7 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
               variant="secondary"
               size="icon"
               onClick={handleNextPage}
-              disabled={tasks?.length === 0 || tasks?.length < limit}
+              disabled={!tasks || tasks.length === 0 || tasks.length < limit}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

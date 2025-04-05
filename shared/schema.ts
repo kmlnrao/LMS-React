@@ -138,7 +138,7 @@ export const insertLaundryProcessSchema = createInsertSchema(laundryProcesses).o
 export const insertCostAllocationSchema = createInsertSchema(costAllocations).omit({ id: true, createdAt: true });
 
 // Export types
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = Omit<z.infer<typeof insertUserSchema>, 'confirmPassword'>;
 export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
