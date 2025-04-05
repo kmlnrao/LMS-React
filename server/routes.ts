@@ -11,6 +11,18 @@ import {
   insertCostAllocationSchema,
   InsertUser
 } from "@shared/schema";
+import { 
+  mockUsers, 
+  mockDepartments, 
+  mockTasks, 
+  mockInventoryItems, 
+  mockEquipment, 
+  mockLaundryProcesses, 
+  mockCostAllocations, 
+  mockDepartmentUsage, 
+  mockTaskCompletionStats, 
+  mockDashboardStats 
+} from "./mock-data";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -163,14 +175,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/session", (req, res) => {
     // For development, return a mock session
     if (process.env.NODE_ENV !== "production") {
-      // Return a mock user for development
+      // Return a mock user from our mock data for development
       const mockUser = {
         id: 1,
-        username: "admin",
-        name: "Admin User",
+        username: "rajesh.kumar",
+        name: "Rajesh Kumar",
         role: "admin",
-        email: "admin@example.com",
-        phone: "1234567890",
+        email: "rajesh.kumar@hospital.org",
+        phone: "9876543210",
         department: "Administration"
       };
       return res.json({ user: mockUser });
@@ -507,45 +519,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: 1,
             name: "Bed Sheets (Queen)",
             category: "Linens",
+            unit: "pcs",
             quantity: 450,
             minimumLevel: 120,
-            unitCost: 12.50,
+            unitCost: 350.50,
             location: "Storage Room A",
             lastRestocked: new Date(Date.now() - 604800000).toISOString(),
-            supplier: "Hospital Textiles Inc."
+            supplier: "Hospital Textiles India Ltd.",
+            notes: "Standard quality hospital bed sheets"
           },
           {
             id: 2,
             name: "Pillowcases",
             category: "Linens",
+            unit: "pcs",
             quantity: 620,
             minimumLevel: 180,
-            unitCost: 5.25,
+            unitCost: 125.75,
             location: "Storage Room A",
             lastRestocked: new Date(Date.now() - 302400000).toISOString(),
-            supplier: "Hospital Textiles Inc."
+            supplier: "Hospital Textiles India Ltd.",
+            notes: "Regular replacement required"
           },
           {
             id: 3,
             name: "Surgical Towels",
             category: "Surgical",
+            unit: "pcs",
             quantity: 285,
             minimumLevel: 150,
-            unitCost: 8.75,
+            unitCost: 225.50,
             location: "Storage Room B",
             lastRestocked: new Date(Date.now() - 172800000).toISOString(),
-            supplier: "MedSupply Co."
+            supplier: "MedSupply Co.",
+            notes: "Sterilized surgical-grade towels"
           },
           {
             id: 4,
             name: "Laundry Detergent (Industrial)",
             category: "Cleaning",
+            unit: "L",
             quantity: 32,
             minimumLevel: 15,
-            unitCost: 45.99,
+            unitCost: 1250.99,
             location: "Supply Closet 2",
             lastRestocked: new Date(Date.now() - 1209600000).toISOString(),
-            supplier: "CleanPro Industries"
+            supplier: "CleanPro Industries",
+            notes: "Hospital-grade detergent with disinfectant properties"
           }
         ]);
       }

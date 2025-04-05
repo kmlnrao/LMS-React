@@ -12,6 +12,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { formatIndianCurrency } from "@/lib/format-utils";
 
 interface InventoryTableProps {
   items?: InventoryItem[];
@@ -52,6 +53,7 @@ export function InventoryTable({ items, isLoading, error, onEdit, onDelete }: In
             <TableHead>Category</TableHead>
             <TableHead>Quantity</TableHead>
             <TableHead>Unit</TableHead>
+            <TableHead>Unit Cost</TableHead>
             <TableHead>Stock Level</TableHead>
             <TableHead>Last Restocked</TableHead>
             <TableHead className="w-[100px] text-right">Actions</TableHead>
@@ -68,6 +70,7 @@ export function InventoryTable({ items, isLoading, error, onEdit, onDelete }: In
                   <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                   <TableCell className="text-right">
@@ -78,7 +81,7 @@ export function InventoryTable({ items, isLoading, error, onEdit, onDelete }: In
 
           {!isLoading && (!items || items.length === 0) && (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
+              <TableCell colSpan={9} className="h-24 text-center">
                 No inventory items found.
               </TableCell>
             </TableRow>
@@ -96,6 +99,7 @@ export function InventoryTable({ items, isLoading, error, onEdit, onDelete }: In
                   <TableCell>{item.category}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{item.unit}</TableCell>
+                  <TableCell>{formatIndianCurrency(item.unitCost)}</TableCell>
                   <TableCell>
                     <ProgressBar
                       value={percentage}

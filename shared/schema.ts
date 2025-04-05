@@ -82,6 +82,9 @@ export const inventoryItems = pgTable("inventory_items", {
   unit: text("unit").notNull(), // e.g., liters, kg, boxes
   quantity: real("quantity").notNull(),
   minimumLevel: real("minimum_level").notNull(),
+  unitCost: real("unit_cost").notNull().default(0), // cost per unit in currency
+  location: text("location"), // storage location
+  supplier: text("supplier"), // supplier name
   lastRestocked: timestamp("last_restocked"),
   notes: text("notes"),
 });
