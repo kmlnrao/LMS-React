@@ -9,6 +9,8 @@ import Reports from "@/pages/reports";
 import HmsIntegration from "@/pages/hms-integration";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import EquipmentPage from "@/pages/equipment";
+import TasksPage from "@/pages/tasks";
 import { MainLayout } from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth";
 import { 
@@ -60,7 +62,7 @@ function Router() {
         feature="tasks"
         component={() => (
           <MainLayout>
-            <ProcessConfig />
+            <TasksPage />
           </MainLayout>
         )} 
       />
@@ -71,7 +73,7 @@ function Router() {
         feature="equipment"
         component={() => (
           <MainLayout>
-            <ProcessConfig />
+            <EquipmentPage />
           </MainLayout>
         )} 
       />
