@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Card, 
   CardContent, 
@@ -16,7 +16,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -27,18 +27,53 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Plus, Search, Calendar, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Search, Calendar, CheckCircle2, Clock, AlertTriangle, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { Task } from "@shared/schema";
 import { TaskForm } from "@/components/task/task-form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function TasksPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [viewTaskOpen, setViewTaskOpen] = useState(false);
+  const [updateStatusOpen, setUpdateStatusOpen] = useState(false);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: tasks, isLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
+  });
+  
+  // Mutation for updating task status
+  const updateTaskMutation = useMutation({
+    mutationFn: async (data: { id: number; status: string; completedAt?: Date }) => {
+      const res = await apiRequest("PATCH", `/api/tasks/${data.id}`, {
+        status: data.status,
+        completedAt: data.status === 'completed' ? new Date() : undefined
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/dashboard-stats'] });
+      toast({
+        title: "Task updated",
+        description: "The task status has been updated successfully.",
+      });
+      setUpdateStatusOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating task",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
   
   // Filter tasks based on status and search term
@@ -49,6 +84,29 @@ export default function TasksPage() {
       task.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+  
+  // Handle viewing task details
+  const handleViewTask = (task: Task) => {
+    setSelectedTask(task);
+    setViewTaskOpen(true);
+  };
+  
+  // Handle updating task status
+  const handleUpdateStatus = (task: Task) => {
+    setSelectedTask(task);
+    setUpdateStatusOpen(true);
+  };
+  
+  // Update task status
+  const updateTaskStatus = (newStatus: string) => {
+    if (selectedTask) {
+      updateTaskMutation.mutate({
+        id: selectedTask.id,
+        status: newStatus,
+        completedAt: newStatus === 'completed' ? new Date() : undefined
+      });
+    }
+  };
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -183,11 +241,18 @@ export default function TasksPage() {
                         <TableCell>{format(new Date(task.dueDate), "MMM d, yyyy")}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">View</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewTask(task)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" /> View
+                            </Button>
                             <Button 
                               variant="outline" 
                               size="sm"
                               disabled={task.status === 'completed'}
+                              onClick={() => handleUpdateStatus(task)}
                             >
                               Update Status
                             </Button>
@@ -229,7 +294,15 @@ export default function TasksPage() {
                             Due: {format(new Date(task.dueDate), "MMM d, yyyy")}
                           </div>
                         </div>
-                        <Button size="sm">Start Processing</Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTask(task);
+                            updateTaskStatus('in_progress');
+                          }}
+                        >
+                          Start Processing
+                        </Button>
                       </div>
                     </Card>
                   ))}
@@ -266,7 +339,16 @@ export default function TasksPage() {
                             Due: {format(new Date(task.dueDate), "MMM d, yyyy")}
                           </div>
                         </div>
-                        <Button size="sm" variant="outline">Complete Task</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedTask(task);
+                            updateTaskStatus('completed');
+                          }}
+                        >
+                          Complete Task
+                        </Button>
                       </div>
                     </Card>
                   ))}
@@ -327,6 +409,10 @@ export default function TasksPage() {
                             size="sm" 
                             variant={task.status !== 'completed' ? 'default' : 'outline'}
                             disabled={task.status === 'completed'}
+                            onClick={() => {
+                              setSelectedTask(task);
+                              updateTaskStatus('completed');
+                            }}
                           >
                             {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
                           </Button>
@@ -340,6 +426,119 @@ export default function TasksPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* View Task Dialog */}
+      <Dialog open={viewTaskOpen} onOpenChange={setViewTaskOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Task Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about the selected task
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium">Task ID</div>
+                  <div>{selectedTask.taskId}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Status</div>
+                  <Badge className={`${getStatusColor(selectedTask.status)}`}>
+                    {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1).replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div className="col-span-2">
+                  <div className="text-sm font-medium">Description</div>
+                  <div>{selectedTask.description}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Priority</div>
+                  <div>{selectedTask.priority}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Weight</div>
+                  <div>{selectedTask.weight ? `${selectedTask.weight} kg` : 'Not specified'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Created At</div>
+                  <div>{format(new Date(selectedTask.createdAt), "MMM d, yyyy h:mm a")}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Due Date</div>
+                  <div>{format(new Date(selectedTask.dueDate), "MMM d, yyyy h:mm a")}</div>
+                </div>
+                {selectedTask.completedAt && (
+                  <div>
+                    <div className="text-sm font-medium">Completed At</div>
+                    <div>{format(new Date(selectedTask.completedAt), "MMM d, yyyy h:mm a")}</div>
+                  </div>
+                )}
+                <div className="col-span-2">
+                  <div className="text-sm font-medium">Notes</div>
+                  <div>{selectedTask.notes || 'No notes'}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Update Status Dialog */}
+      <Dialog open={updateStatusOpen} onOpenChange={setUpdateStatusOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Task Status</DialogTitle>
+            <DialogDescription>
+              Change the status of the selected task
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col space-y-2">
+                <div>
+                  <div className="font-medium">Current Status:</div>
+                  <Badge className={`${getStatusColor(selectedTask.status)} mt-1`}>
+                    {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1).replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div className="font-medium mt-4">Select New Status:</div>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    className={selectedTask.status === 'pending' ? 'border-2 border-primary' : ''}
+                    onClick={() => updateTaskStatus('pending')}
+                  >
+                    <Clock className="h-4 w-4 mr-2" /> Pending
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className={selectedTask.status === 'in_progress' ? 'border-2 border-primary' : ''}
+                    onClick={() => updateTaskStatus('in_progress')}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" /> In Progress
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className={selectedTask.status === 'completed' ? 'border-2 border-primary' : ''}
+                    onClick={() => updateTaskStatus('completed')}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" /> Completed
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className={selectedTask.status === 'delayed' ? 'border-2 border-primary' : ''}
+                    onClick={() => updateTaskStatus('delayed')}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" /> Delayed
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
