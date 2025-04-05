@@ -61,9 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return done(null, false, { message: "Invalid username or password" });
         }
         
-        // In a real app, you'd hash and compare passwords
-        // Something like: const match = await bcrypt.compare(password, user.password);
-        if (password !== user.password) {
+        // Use bcrypt to compare passwords
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
           return done(null, false, { message: "Invalid username or password" });
         }
         
@@ -179,13 +179,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Username already exists" });
       }
       
-      // In a real app, we'd hash the password
-      // const hashedPassword = await bcrypt.hash(password, 10);
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
       
       // Note: We're explicitly omitting confirmPassword here as it's only for validation
       const userData: InsertUser = { 
         username, 
-        password, 
+        password: hashedPassword, 
         name, 
         role, 
         department, 
