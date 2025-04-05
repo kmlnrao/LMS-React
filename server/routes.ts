@@ -11,18 +11,8 @@ import {
   insertCostAllocationSchema,
   InsertUser
 } from "@shared/schema";
-import { 
-  mockUsers, 
-  mockDepartments, 
-  mockTasks, 
-  mockInventoryItems, 
-  mockEquipment, 
-  mockLaundryProcesses, 
-  mockCostAllocations, 
-  mockDepartmentUsage, 
-  mockTaskCompletionStats, 
-  mockDashboardStats 
-} from "./mock-data";
+import { seedAllData, checkIfDataExists } from "./data-seeder";
+import { getDashboardStats, getDepartmentUsage, getTaskCompletionStats } from "./analytics-service";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -667,13 +657,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Analytics routes
+  // Data initialization route - use this to seed the database
+  app.get("/api/system/init", isAuthenticated, async (req, res) => {
+    try {
+      // Check if we have enough data
+      const hasData = await checkIfDataExists();
+      
+      if (!hasData) {
+        // Seed data
+        const seeded = await seedAllData();
+        if (seeded) {
+          res.json({ success: true, message: "Database seeded successfully with sample data" });
+        } else {
+          res.status(500).json({ success: false, message: "Failed to seed database" });
+        }
+      } else {
+        res.json({ success: true, message: "Database already contains data" });
+      }
+    } catch (error) {
+      console.error("Data initialization error:", error);
+      res.status(500).json({ success: false, message: "Error initializing database", error });
+    }
+  });
+
+  // Analytics routes with real implementations
   app.get("/api/analytics/department-usage", isAuthenticated, async (req, res) => {
     try {
       const period = (req.query.period as "weekly" | "monthly" | "quarterly") || "weekly";
-      const data = await storage.getDepartmentUsage(period);
+      const data = await getDepartmentUsage(period);
       res.json(data);
     } catch (error) {
+      console.error("Error fetching department usage:", error);
       res.status(500).json({ message: "Error fetching department usage analytics", error });
     }
   });
@@ -681,18 +695,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analytics/task-completion", isAuthenticated, async (req, res) => {
     try {
       const period = (req.query.period as "daily" | "weekly" | "monthly") || "daily";
-      const data = await storage.getTaskCompletionStats(period);
+      const data = await getTaskCompletionStats(period);
       res.json(data);
     } catch (error) {
+      console.error("Error fetching task completion stats:", error);
       res.status(500).json({ message: "Error fetching task completion analytics", error });
     }
   });
   
   app.get("/api/analytics/dashboard-stats", isAuthenticated, async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const stats = await getDashboardStats();
       res.json(stats);
     } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
       res.status(500).json({ message: "Error fetching dashboard statistics", error });
     }
   });
