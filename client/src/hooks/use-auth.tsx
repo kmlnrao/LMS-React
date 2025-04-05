@@ -23,7 +23,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const {
-    data: user,
+    data: userData,
     error,
     isLoading,
   } = useQuery<{ user: SelectUser } | null, Error>({
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: user?.user ?? null,
+        user: userData?.user ?? null,
         isLoading,
         error,
         loginMutation,
