@@ -50,8 +50,9 @@ function generateEmail(name: string): string {
 
 /**
  * Seeds all data for the application
+ * @param forceReseed If true, will attempt to seed all tables even if some already have data
  */
-export async function seedAllData() {
+export async function seedAllData(forceReseed: boolean = false) {
   try {
     console.log("Starting data seeding...");
     
@@ -61,20 +62,26 @@ export async function seedAllData() {
     // Create users including admin
     await seedUsers();
     
-    // Create inventory items
-    await seedInventoryItems();
-    
-    // Create equipment
-    await seedEquipment();
-    
-    // Create laundry processes
-    await seedLaundryProcesses();
-    
-    // Create tasks
-    await seedTasks();
-    
-    // Create cost allocations
-    await seedCostAllocations();
+    // Always seed these tables if forceReseed is true or they're empty
+    const taskCount = await db.select().from(tasks);
+    if (forceReseed || taskCount.length === 0) {
+      // Create inventory items
+      await seedInventoryItems();
+      
+      // Create equipment
+      await seedEquipment();
+      
+      // Create laundry processes
+      await seedLaundryProcesses();
+      
+      // Create tasks
+      await seedTasks();
+      
+      // Create cost allocations
+      await seedCostAllocations();
+    } else {
+      console.log("Some data tables already have data. Set forceReseed to true to override.");
+    }
     
     console.log("Data seeding complete!");
     return true;
@@ -600,6 +607,24 @@ async function seedCostAllocations() {
 }
 
 export async function checkIfDataExists() {
-  const userCount = await db.select().from(users);
-  return userCount.length > 1; // Check if there's more than just the admin user
+  try {
+    const taskCount = await db.select().from(tasks);
+    const inventoryCount = await db.select().from(inventoryItems);
+    const equipmentCount = await db.select().from(equipment);
+    const processCount = await db.select().from(laundryProcesses);
+    const costCount = await db.select().from(costAllocations);
+    
+    // Check if all types of data exist
+    const allDataExists = 
+      taskCount.length > 0 && 
+      inventoryCount.length > 0 && 
+      equipmentCount.length > 0 && 
+      processCount.length > 0 && 
+      costCount.length > 0;
+    
+    return allDataExists;
+  } catch (error) {
+    console.error("Error checking if data exists:", error);
+    return false;
+  }
 }

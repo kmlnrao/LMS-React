@@ -680,6 +680,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin route to force re-seeding all data
+  app.post("/api/admin/reseed", isAdmin, async (req, res) => {
+    try {
+      console.log("Forcing re-seed of all data tables");
+      const success = await seedAllData(true); // Force reseed all tables
+      
+      if (success) {
+        return res.status(200).json({ message: "Database reseeded successfully" });
+      } else {
+        return res.status(500).json({ message: "Error reseeding database" });
+      }
+    } catch (error) {
+      console.error("Error in reseed endpoint:", error);
+      return res.status(500).json({ message: "Error reseeding database" });
+    }
+  });
+
   // Analytics routes with real implementations
   app.get("/api/analytics/department-usage", isAuthenticated, async (req, res) => {
     try {
