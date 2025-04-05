@@ -29,7 +29,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Plus, Search, Calendar, CheckCircle2, Clock, AlertTriangle, Eye } from "lucide-react";
 import { format } from "date-fns";
-import { Task } from "@shared/schema";
+import { Task, Department } from "@shared/schema";
 import { TaskForm } from "@/components/task/task-form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -47,6 +47,11 @@ export default function TasksPage() {
   
   const { data: tasks, isLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
+  });
+  
+  const { data: departments } = useQuery<Department[]>({
+    queryKey: ['/api/departments'],
+    staleTime: 60000, // Cache departments data for 60 seconds
   });
   
   // Mutation for updating task status
@@ -229,7 +234,9 @@ export default function TasksPage() {
                       <TableRow key={task.id}>
                         <TableCell className="font-medium">{task.taskId}</TableCell>
                         <TableCell>{task.description}</TableCell>
-                        <TableCell>{task.departmentId}</TableCell>
+                        <TableCell>
+                          {departments?.find(d => d.id === task.departmentId)?.name || `Department ${task.departmentId}`}
+                        </TableCell>
                         <TableCell>{task.priority}</TableCell>
                         <TableCell>
                           <Badge className={`flex items-center ${getStatusColor(task.status)}`}>
@@ -452,6 +459,10 @@ export default function TasksPage() {
                 <div className="col-span-2">
                   <div className="text-sm font-medium">Description</div>
                   <div>{selectedTask.description}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Department</div>
+                  <div>{departments?.find(d => d.id === selectedTask.departmentId)?.name || `Department ${selectedTask.departmentId}`}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium">Priority</div>

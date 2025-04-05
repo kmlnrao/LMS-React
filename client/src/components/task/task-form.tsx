@@ -85,6 +85,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
   // Get departments for select input - ensure consistent order of hooks
   const departmentsQuery = useQuery<Department[]>({
     queryKey: ["/api/departments"],
+    staleTime: 60000, // Cache departments data for 60 seconds
   });
   const departments = departmentsQuery.data;
   const isDepartmentsLoading = departmentsQuery.isLoading;
