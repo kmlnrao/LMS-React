@@ -65,6 +65,17 @@ function Router() {
         )} 
       />
       
+      {/* Equipment - requires 'equipment' feature permission */}
+      <FeatureProtectedRoute 
+        path="/equipment" 
+        feature="equipment"
+        component={() => (
+          <MainLayout>
+            <ProcessConfig />
+          </MainLayout>
+        )} 
+      />
+      
       {/* Inventory Management - requires 'inventory' feature permission */}
       <FeatureProtectedRoute 
         path="/inventory" 
@@ -105,6 +116,28 @@ function Router() {
         component={() => (
           <MainLayout>
             <HmsIntegration />
+          </MainLayout>
+        )} 
+      />
+      
+      {/* Departments - requires 'departments' feature permission */}
+      <FeatureProtectedRoute 
+        path="/departments" 
+        feature="departments"
+        component={() => (
+          <MainLayout>
+            <ProcessConfig />
+          </MainLayout>
+        )} 
+      />
+      
+      {/* Settings - requires 'settings' feature permission */}
+      <FeatureProtectedRoute 
+        path="/settings" 
+        feature="settings"
+        component={() => (
+          <MainLayout>
+            <ProcessConfig />
           </MainLayout>
         )} 
       />
