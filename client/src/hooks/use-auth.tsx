@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/auth/session"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // Don't cache the user session
   });
 
   const loginMutation = useMutation({

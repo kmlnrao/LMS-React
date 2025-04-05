@@ -45,7 +45,8 @@ export default function AuthPage() {
           title: "Login successful",
           description: "Welcome back!",
         });
-        navigate("/");
+        // Force navigation to dashboard
+        window.location.href = "/";
       },
     });
   };
