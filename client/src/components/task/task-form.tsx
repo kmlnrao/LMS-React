@@ -191,8 +191,14 @@ export function TaskForm({ onClose }: TaskFormProps) {
               <FormItem>
                 <FormLabel>Assign To (Optional)</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
-                  defaultValue={field.value?.toString()}
+                  onValueChange={(value) => {
+                    if (value === "unassigned") {
+                      field.onChange(undefined);
+                    } else {
+                      field.onChange(parseInt(value));
+                    }
+                  }}
+                  defaultValue={field.value?.toString() || "unassigned"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -200,7 +206,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Unassigned</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
                     {isUsersLoading ? (
                       <SelectItem value="loading" disabled>Loading...</SelectItem>
                     ) : users?.filter(user => 
