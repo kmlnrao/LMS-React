@@ -115,6 +115,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
       
+      // Special case for user creation to handle confirmPassword field
+      if (schema === insertUserSchema) {
+        // Make sure confirmPassword exists in the request
+        if (!req.body.confirmPassword) {
+          return res.status(400).json({ 
+            message: "Validation error: Required at \"confirmPassword\"",
+            error: {
+              issues: [{ path: ["confirmPassword"], message: "Required" }]
+            }
+          });
+        }
+        // Make sure passwords match
+        if (req.body.password !== req.body.confirmPassword) {
+          return res.status(400).json({ 
+            message: "Validation error: Passwords don't match",
+            error: {
+              issues: [{ path: ["confirmPassword"], message: "Passwords don't match" }]
+            }
+          });
+        }
+      }
+      
       schema.parse(req.body);
       next();
     } catch (error) {
