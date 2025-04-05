@@ -11,55 +11,97 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import { MainLayout } from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute, AdminProtectedRoute } from "./lib/protected-route";
+import { 
+  ProtectedRoute, 
+  FeatureProtectedRoute, 
+  RoleProtectedRoute, 
+  AdminProtectedRoute 
+} from "./lib/protected-route";
 
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={() => (
-        <MainLayout>
-          <Dashboard />
-        </MainLayout>
-      )} />
+      {/* Dashboard - accessible by all authenticated users */}
+      <FeatureProtectedRoute 
+        path="/" 
+        feature="dashboard"
+        component={() => (
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        )} 
+      />
       
-      <AdminProtectedRoute path="/users" component={() => (
-        <MainLayout>
-          <UserManagement />
-        </MainLayout>
-      )} />
+      {/* User Management - requires 'users' feature permission */}
+      <FeatureProtectedRoute 
+        path="/users" 
+        feature="users"
+        component={() => (
+          <MainLayout>
+            <UserManagement />
+          </MainLayout>
+        )} 
+      />
       
-      <ProtectedRoute path="/process-config" component={() => (
-        <MainLayout>
-          <ProcessConfig />
-        </MainLayout>
-      )} />
+      {/* Process Configuration - requires 'processes' feature permission */}
+      <FeatureProtectedRoute 
+        path="/process-config" 
+        feature="processes"
+        component={() => (
+          <MainLayout>
+            <ProcessConfig />
+          </MainLayout>
+        )} 
+      />
       
-      <ProtectedRoute path="/inventory" component={() => (
-        <MainLayout>
-          <Inventory />
-        </MainLayout>
-      )} />
+      {/* Inventory Management - requires 'inventory' feature permission */}
+      <FeatureProtectedRoute 
+        path="/inventory" 
+        feature="inventory"
+        component={() => (
+          <MainLayout>
+            <Inventory />
+          </MainLayout>
+        )} 
+      />
       
-      <ProtectedRoute path="/billing" component={() => (
-        <MainLayout>
-          <Billing />
-        </MainLayout>
-      )} />
+      {/* Billing - requires 'billing' feature permission */}
+      <FeatureProtectedRoute 
+        path="/billing" 
+        feature="billing"
+        component={() => (
+          <MainLayout>
+            <Billing />
+          </MainLayout>
+        )} 
+      />
       
-      <ProtectedRoute path="/reports" component={() => (
-        <MainLayout>
-          <Reports />
-        </MainLayout>
-      )} />
+      {/* Reports - requires 'reports' feature permission */}
+      <FeatureProtectedRoute 
+        path="/reports" 
+        feature="reports"
+        component={() => (
+          <MainLayout>
+            <Reports />
+          </MainLayout>
+        )} 
+      />
       
-      <ProtectedRoute path="/hms-integration" component={() => (
-        <MainLayout>
-          <HmsIntegration />
-        </MainLayout>
-      )} />
+      {/* HMS Integration - requires 'hms-integration' feature permission */}
+      <FeatureProtectedRoute 
+        path="/hms-integration" 
+        feature="hms-integration"
+        component={() => (
+          <MainLayout>
+            <HmsIntegration />
+          </MainLayout>
+        )} 
+      />
       
+      {/* Authentication page - public */}
       <Route path="/auth" component={AuthPage} />
       
+      {/* 404 page - public */}
       <Route component={NotFound} />
     </Switch>
   );

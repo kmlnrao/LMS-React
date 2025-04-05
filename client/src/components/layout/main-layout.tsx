@@ -3,8 +3,7 @@ import { useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useQuery } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,12 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-  
-  const { data: session } = useQuery<{ user: User } | null>({
-    queryKey: ["/api/auth/session"],
-    retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  const { user } = useAuth();
   
   useEffect(() => {
     if (isMobile) {
@@ -51,6 +45,12 @@ export function MainLayout({ children }: MainLayoutProps) {
         return "Process Configuration";
       case "/inventory":
         return "Inventory Management";
+      case "/equipment":
+        return "Equipment Management";
+      case "/departments":
+        return "Departments";
+      case "/tasks":
+        return "Tasks";
       case "/billing":
         return "Billing & Cost Allocation";
       case "/reports":
@@ -71,10 +71,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             isMobile ? "fixed inset-0 z-40 w-64" : "hidden md:flex md:w-64 md:flex-col"
           }`}
         >
-          <Sidebar 
-            userRole={session?.user.role} 
-            userName={session?.user.name} 
-          />
+          <Sidebar />
         </div>
       )}
       

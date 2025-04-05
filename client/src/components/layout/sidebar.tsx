@@ -8,7 +8,10 @@ import {
   Receipt, 
   PieChart, 
   Link as LinkIcon,
-  LogOut 
+  LogOut, 
+  Wrench,
+  ClipboardList,
+  BoxIcon
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,20 +20,20 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMemo } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { hasPermission } from "@/lib/role-utils";
 
 interface SidebarProps {
-  userRole?: string;
-  userName?: string;
   className?: string;
 }
 
-export function Sidebar({ 
-  userRole = "admin", 
-  userName = "John Doe", 
-  className 
-}: SidebarProps) {
+export function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
   const { toast } = useToast();
+  const { user, logoutMutation } = useAuth();
+  
+  const userName = user?.name || "User";
+  const userRole = user?.role || "staff";
   
   const initials = useMemo(() => {
     if (!userName) return "UN";
@@ -44,12 +47,11 @@ export function Sidebar({
   
   const handleLogout = async () => {
     try {
-      await apiRequest("POST", "/api/auth/logout", {});
+      logoutMutation.mutate();
       toast({
         title: "Success",
         description: "You have been logged out successfully.",
       });
-      // Redirect to login page in a real app
     } catch (error) {
       toast({
         title: "Error",
@@ -59,55 +61,73 @@ export function Sidebar({
     }
   };
   
-  // Define navigation items based on user role
+  // Define all possible navigation items
   const navItems = [
     {
       name: "Dashboard",
       href: "/",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      roles: ["admin", "staff", "department"]
+      feature: "dashboard"
     },
     {
-      name: "User Management",
-      href: "/users",
-      icon: <Users className="h-5 w-5" />,
-      roles: ["admin"]
+      name: "Tasks",
+      href: "/tasks",
+      icon: <ClipboardList className="h-5 w-5" />,
+      feature: "tasks"
+    },
+    {
+      name: "Inventory",
+      href: "/inventory",
+      icon: <Archive className="h-5 w-5" />,
+      feature: "inventory"
+    },
+    {
+      name: "Equipment",
+      href: "/equipment",
+      icon: <Wrench className="h-5 w-5" />,
+      feature: "equipment"
+    },
+    {
+      name: "Departments",
+      href: "/departments",
+      icon: <BoxIcon className="h-5 w-5" />,
+      feature: "departments"
     },
     {
       name: "Process Configuration",
       href: "/process-config",
       icon: <Settings className="h-5 w-5" />,
-      roles: ["admin"]
+      feature: "processes"
     },
     {
-      name: "Inventory Management",
-      href: "/inventory",
-      icon: <Archive className="h-5 w-5" />,
-      roles: ["admin", "staff"]
+      name: "User Management",
+      href: "/users",
+      icon: <Users className="h-5 w-5" />,
+      feature: "users"
     },
     {
       name: "Billing & Cost Allocation",
       href: "/billing",
       icon: <Receipt className="h-5 w-5" />,
-      roles: ["admin"]
+      feature: "billing"
     },
     {
       name: "Reports & Analytics",
       href: "/reports",
       icon: <PieChart className="h-5 w-5" />,
-      roles: ["admin", "department"]
+      feature: "reports"
     },
     {
       name: "HMS Integration",
       href: "/hms-integration",
       icon: <LinkIcon className="h-5 w-5" />,
-      roles: ["admin"]
+      feature: "hms-integration"
     }
   ];
   
-  // Filter nav items based on user role
+  // Filter nav items based on user role permissions
   const filteredNavItems = navItems.filter(item => 
-    item.roles.includes(userRole)
+    hasPermission(userRole, item.feature)
   );
 
   return (

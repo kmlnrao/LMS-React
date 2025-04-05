@@ -187,49 +187,76 @@ async function seedUsers() {
     "Srivastava", "Yadav", "Chauhan", "Rathore", "Shekhawat", "Rajput", "Malik", "Khan", "Ahmed", "Qureshi"
   ];
   
-  const roles = ["admin", "staff", "department"];
+  // Define the distribution of roles (total 60 users)
+  const roleDistribution = [
+    { role: "admin", count: 3 },         // 3 administrators
+    { role: "manager", count: 5 },       // 5 managers
+    { role: "supervisor", count: 8 },    // 8 supervisors
+    { role: "staff", count: 15 },        // 15 general staff
+    { role: "department", count: 10 },   // 10 department users
+    { role: "inventory", count: 7 },     // 7 inventory specialists
+    { role: "technician", count: 6 },    // 6 technicians
+    { role: "billing", count: 4 },       // 4 billing specialists
+    { role: "reports", count: 2 }        // 2 report specialists
+  ];
   
-  // Create staff users
-  const staffUsers: InsertUser[] = [];
+  // Create users array
+  const allUsers: InsertUser[] = [];
   
-  // Create 50 additional users
-  for (let i = 0; i < 50; i++) {
-    const firstName = getRandomElement(indianFirstNames);
-    const lastName = getRandomElement(indianLastNames);
-    const name = `${firstName} ${lastName}`;
-    const email = generateEmail(name);
-    const phone = generateMobileNumber();
-    const role = getRandomElement(roles);
-    
-    // Assign a department for department role users
-    const department = role === "department" ? 
-      getRandomElement(allDepartments).name : 
-      (Math.random() > 0.7 ? getRandomElement(allDepartments).name : null);
-    
-    // Create a username based on firstname.lastname format
-    const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
-    
-    // Create a simple password (in production, you would use a more secure method)
-    const password = await bcrypt.hash(`${firstName.toLowerCase()}123`, 10);
-    
-    staffUsers.push({
-      username,
-      password,
-      name,
-      role: role as any,
-      department,
-      email,
-      phone
-    });
+  // Generate users according to the distribution
+  for (const roleData of roleDistribution) {
+    for (let i = 0; i < roleData.count; i++) {
+      const firstName = getRandomElement(indianFirstNames);
+      const lastName = getRandomElement(indianLastNames);
+      const name = `${firstName} ${lastName}`;
+      const email = generateEmail(name);
+      const phone = generateMobileNumber();
+      const role = roleData.role;
+      
+      // Assign department based on role
+      let department = null;
+      
+      // Assign a department for certain roles that need it
+      if (role === "department") {
+        // Department users always have a department
+        department = getRandomElement(allDepartments).name;
+      } else if (["staff", "supervisor", "technician"].includes(role)) {
+        // These roles often have department assignments
+        department = Math.random() > 0.3 ? getRandomElement(allDepartments).name : null;
+      } else if (role === "manager") {
+        // Managers sometimes have department assignments
+        department = Math.random() > 0.5 ? getRandomElement(allDepartments).name : null;
+      }
+      
+      // Create a username based on firstname.lastname format
+      // Ensure uniqueness by adding a number if needed
+      let username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+      if (allUsers.some(u => u.username === username)) {
+        username = `${username}${Math.floor(Math.random() * 100)}`;
+      }
+      
+      // Create a simple password (in production, you would use a more secure method)
+      const password = await bcrypt.hash(`${firstName.toLowerCase()}123`, 10);
+      
+      allUsers.push({
+        username,
+        password,
+        name,
+        role: role as any,
+        department,
+        email,
+        phone
+      });
+    }
   }
   
   // Create batches of 10 to avoid overloading the database
-  for (let i = 0; i < staffUsers.length; i += 10) {
-    const batch = staffUsers.slice(i, i + 10);
+  for (let i = 0; i < allUsers.length; i += 10) {
+    const batch = allUsers.slice(i, i + 10);
     await db.insert(users).values(batch);
   }
   
-  console.log(`Seeded 1 admin user and ${staffUsers.length} staff users`);
+  console.log(`Seeded 1 admin user and ${allUsers.length} additional users`);
 }
 
 /**
