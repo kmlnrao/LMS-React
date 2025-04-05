@@ -71,18 +71,16 @@ export function UserForm({ user, onClose }: UserFormProps) {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: UserFormValues) => {
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...userData } = data;
-      
+      // Don't remove confirmPassword
       if (user) {
         // If updating, only send changed fields
         const updatedFields: Partial<UserFormValues> = {};
         let hasChanges = false;
         
-        Object.keys(userData).forEach((key) => {
-          const typedKey = key as keyof typeof userData;
-          if (userData[typedKey] !== user[typedKey as keyof User]) {
-            (updatedFields as any)[typedKey] = userData[typedKey];
+        Object.keys(data).forEach((key) => {
+          const typedKey = key as keyof typeof data;
+          if (typedKey !== "confirmPassword" && data[typedKey] !== user[typedKey as keyof User]) {
+            (updatedFields as any)[typedKey] = data[typedKey];
             hasChanges = true;
           }
         });
@@ -99,7 +97,8 @@ export function UserForm({ user, onClose }: UserFormProps) {
         const response = await apiRequest("PATCH", `/api/users/${user.id}`, updatedFields);
         return response.json();
       } else {
-        const response = await apiRequest("POST", "/api/users", userData);
+        // Send all data including confirmPassword for new users
+        const response = await apiRequest("POST", "/api/users", data);
         return response.json();
       }
     },

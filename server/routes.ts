@@ -195,10 +195,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/users", isAdmin, validateRequest(insertUserSchema), async (req, res) => {
+  app.post("/api/users", isAdmin, async (req, res) => {
     try {
-      // Extract just the fields we need from insertUserSchema (omitting confirmPassword)
       const { username, password, name, role, department, email, phone, confirmPassword } = req.body;
+      
+      // Perform manual validation since we're skipping middleware
+      if (!username || !password || !name || !role) {
+        return res.status(400).json({ message: "Username, password, name, and role are required" });
+      }
+      
+      // Validate confirmPassword
+      if (!confirmPassword) {
+        return res.status(400).json({ 
+          message: "Validation error: Required at \"confirmPassword\"",
+          error: {
+            issues: [{ path: ["confirmPassword"], message: "Required" }]
+          }
+        });
+      }
+      
+      // Validate password matching
+      if (password !== confirmPassword) {
+        return res.status(400).json({ 
+          message: "Validation error: Passwords don't match",
+          error: {
+            issues: [{ path: ["confirmPassword"], message: "Passwords don't match" }]
+          }
+        });
+      }
       
       // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
@@ -209,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      // Note: We're explicitly omitting confirmPassword here as it's only for validation
+      // Create user object (omit confirmPassword)
       const userData: InsertUser = { 
         username, 
         password: hashedPassword, 
