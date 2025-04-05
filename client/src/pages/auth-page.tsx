@@ -176,13 +176,18 @@ export default function AuthPage() {
                     </form>
                   </Form>
                 </CardContent>
-                <CardFooter className="flex flex-col">
+                <CardFooter className="flex flex-col gap-2">
                   <p className="text-sm text-muted-foreground text-center">
                     Don't have an account?{" "}
                     <Button variant="link" className="p-0" onClick={() => setTab("register")}>
                       Register
                     </Button>
                   </p>
+                  <div className="text-xs text-muted-foreground text-center border-t pt-2 mt-1">
+                    <p>Sample Login:</p>
+                    <p><strong>Username:</strong> admin</p>
+                    <p><strong>Password:</strong> admin123</p>
+                  </div>
                 </CardFooter>
               </Card>
             </TabsContent>
@@ -249,6 +254,7 @@ export default function AuthPage() {
                                 type="email"
                                 placeholder="your.email@hospital.org"
                                 autoComplete="email"
+                                value={field.value || ""}
                                 disabled={registerMutation.isPending}
                               />
                             </FormControl>
@@ -269,6 +275,7 @@ export default function AuthPage() {
                                   {...field} 
                                   placeholder="10-digit phone number"
                                   autoComplete="tel"
+                                  value={field.value || ""}
                                   disabled={registerMutation.isPending}
                                 />
                               </FormControl>

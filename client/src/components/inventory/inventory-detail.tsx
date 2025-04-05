@@ -48,7 +48,7 @@ export function InventoryDetail({ item, onEdit, onRestock }: InventoryDetailProp
             </CardTitle>
             <CardDescription>{item.category}</CardDescription>
           </div>
-          <Badge variant={status === "error" ? "destructive" : status === "warning" ? "warning" : "outline"}>
+          <Badge variant={status === "error" ? "destructive" : status === "warning" ? "outline" : "outline"}>
             {status === "error" ? "Low Stock" : status === "warning" ? "Moderate Stock" : "In Stock"}
           </Badge>
         </div>
