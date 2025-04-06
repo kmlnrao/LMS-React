@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { hasPermission } from "@/lib/role-utils";
+import suvarnaLogo from "../../assets/suvarna_logo.png";
 
 interface SidebarProps {
   className?: string;
@@ -138,21 +139,13 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div className={cn("flex flex-col h-full bg-gray-800 text-white", className)}>
       {/* Logo */}
-      <div className="flex items-center justify-center h-16 border-b border-gray-700">
-        <div className="flex items-center space-x-2">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-6 w-6 text-primary-400"
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
-          </svg>
-          <span className="text-xl font-semibold">LMS-React</span>
+      <div className="flex items-center justify-center h-20 border-b border-gray-700 bg-white p-2">
+        <div className="flex items-center justify-center">
+          <img 
+            src={suvarnaLogo} 
+            alt="Suvarna Technosoft" 
+            className="h-14 object-contain"
+          />
         </div>
       </div>
       

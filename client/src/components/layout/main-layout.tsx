@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { Footer } from "@/components/layout/footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -89,6 +90,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        <Footer />
       </div>
     </div>
   );
