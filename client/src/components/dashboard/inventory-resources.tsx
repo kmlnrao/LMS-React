@@ -57,7 +57,7 @@ export function InventoryResources() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Inventory Status</CardTitle>
-          <Button variant="link" size="sm">
+          <Button variant="link" size="sm" onClick={() => window.location.href = '/inventory'}>
             View All
           </Button>
         </CardHeader>
@@ -122,7 +122,7 @@ export function InventoryResources() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Equipment Status</CardTitle>
-          <Button variant="link" size="sm">
+          <Button variant="link" size="sm" onClick={() => window.location.href = '/equipment'}>
             View All
           </Button>
         </CardHeader>

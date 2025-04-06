@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Card, 
@@ -48,6 +48,20 @@ export default function TasksPage() {
   const { data: tasks, isLoading } = useQuery<Task[]>({
     queryKey: ['/api/tasks'],
   });
+  
+  // Check for task ID in URL query parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get('id');
+    
+    if (taskId && tasks) {
+      const task = tasks.find(t => t.id === parseInt(taskId));
+      if (task) {
+        setSelectedTask(task);
+        setViewTaskOpen(true);
+      }
+    }
+  }, [tasks]);
   
   const { data: departments } = useQuery<Department[]>({
     queryKey: ['/api/departments'],

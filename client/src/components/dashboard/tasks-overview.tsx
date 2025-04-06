@@ -182,7 +182,11 @@ export function TasksOverview({ limit = 4 }: TasksOverviewProps) {
                         {task.dueDate ? format(new Date(task.dueDate), "MMM d, h:mm a") : "Not set"}
                       </TableCell>
                       <TableCell>
-                        <Button variant="link" size="sm">
+                        <Button 
+                          variant="link" 
+                          size="sm"
+                          onClick={() => setLocation(`/tasks?id=${task.id}`)}
+                        >
                           View Details
                         </Button>
                       </TableCell>
