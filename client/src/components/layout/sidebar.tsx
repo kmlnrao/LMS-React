@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { hasPermission } from "@/lib/role-utils";
+import suvarnaBluelogo from "../../assets/suvarna_blue_logo.png";
 
 interface SidebarProps {
   className?: string;
@@ -137,9 +138,14 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn("flex flex-col h-full bg-gray-800 text-white", className)}>
-      {/* App Title */}
+      {/* App Title with Logo */}
       <div className="flex items-center justify-center h-20 border-b border-gray-700 bg-gray-900 p-2">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-2">
+          <img 
+            src={suvarnaBluelogo} 
+            alt="Suvarna" 
+            className="h-8 object-contain"
+          />
           <h1 className="text-white text-xl font-bold">LMS-React</h1>
         </div>
       </div>
