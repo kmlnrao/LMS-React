@@ -47,10 +47,15 @@ export function Sidebar({ className }: SidebarProps) {
   
   const handleLogout = async () => {
     try {
-      logoutMutation.mutate();
-      toast({
-        title: "Success",
-        description: "You have been logged out successfully.",
+      logoutMutation.mutate(undefined, {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "You have been logged out successfully.",
+          });
+          // Force navigation to auth page
+          window.location.href = "/auth";
+        }
       });
     } catch (error) {
       toast({

@@ -82,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/auth/session"], null);
+      // Invalidate all queries to ensure clean state
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
